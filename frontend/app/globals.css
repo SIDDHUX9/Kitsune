@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&family=Noto+Serif:ital,wght@0,400;0,600;1,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-color: #0A0C0E;
+  --text-paper: #F5F2EB;
+}
+
+body {
+  background-color: #0A0C0E;
+  color: #F5F2EB;
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Serene Japanese Glassmorphism Card */
+.zen-glass {
+  background: rgba(18, 22, 26, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(245, 242, 235, 0.07);
+}
+
+.zen-glass-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.zen-glass-hover:hover {
+  background: rgba(24, 30, 36, 0.85);
+  border-color: rgba(229, 169, 60, 0.3);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 20px rgba(229, 169, 60, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Ambient Paper Lantern Glow */
+.lantern-glow {
+  box-shadow: 0 0 35px rgba(229, 169, 60, 0.15);
+}
+
+.vermilion-glow {
+  box-shadow: 0 0 35px rgba(200, 75, 49, 0.2);
+}
+
+/* Monospaced Code Box */
+.zen-code {
+  font-family: 'Courier New', Courier, monospace;
+  background: #060809;
+  border: 1px solid rgba(245, 242, 235, 0.08);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0A0C0E;
+}
+::-webkit-scrollbar-thumb {
+  background: #1F262E;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #E5A93C;
+}

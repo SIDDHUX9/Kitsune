@@ -1,0 +1,21 @@
+{
+  "name": "kitsune-marketplace",
+  "version": "1.0.0",
+  "description": "Kitsune - 0G Verifiable Agent Marketplace Monorepo",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "start": "npm --prefix frontend run start",
+    "relayer": "npm --prefix relayer run dev",
+    "contracts:compile": "npm --prefix contracts run compile",
+    "contracts:test": "npm --prefix contracts run test",
+    "deploy:aristotle": "npm --prefix contracts run deploy:aristotle",
+    "deploy:galileo": "npm --prefix contracts run deploy:galileo"
+  },
+  "workspaces": [
+    "contracts",
+    "relayer",
+    "frontend"
+  ]
+}
