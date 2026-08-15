@@ -120,9 +120,9 @@ export async function POST(request: Request) {
     const auditLogHash = `0g_storage_root_${merkleRoot.slice(2, 18)}`;
 
     // 5. Generate authentic worker ECDSA attestation signature
-    const workerWallet = new ethers.Wallet(
-      process.env.WORKER_PRIVATE_KEY || "0xfd9b76f4e98112193ac346bb83d9a3160ae3e731d04273302d20c6a6339ada0f"
-    );
+    const workerRawKey = process.env.WORKER_PRIVATE_KEY || "0xfd9b76f4e98112193ac346bb83d9a3160ae3e731d04273302d20c6a6339ada0f";
+    const workerKey = workerRawKey.startsWith("0x") ? workerRawKey : `0x${workerRawKey}`;
+    const workerWallet = new ethers.Wallet(workerKey);
 
     const reqIdNum = requestId || 1045;
     const listIdNum = listingId || 1;
@@ -139,9 +139,10 @@ export async function POST(request: Request) {
     let blockNumber = 0;
 
     try {
-      const rpc = process.env.OG_GALILEO_RPC || "http://evmrpc-testnet.0g.ai";
+      const rpc = process.env.OG_GALILEO_RPC || "https://evmrpc-testnet.0g.ai";
       const provider = new ethers.JsonRpcProvider(rpc);
-      const privateKey = process.env.PRIVATE_KEY || "fd9b76f4e98112193ac346bb83d9a3160ae3e731d04273302d20c6a6339ada0f";
+      const rawKey = process.env.PRIVATE_KEY || "0xfd9b76f4e98112193ac346bb83d9a3160ae3e731d04273302d20c6a6339ada0f";
+      const privateKey = rawKey.startsWith("0x") ? rawKey : `0x${rawKey}`;
       const relayerWallet = new ethers.Wallet(privateKey, provider);
 
       const marketplaceContract = new ethers.Contract("0x9F98Ea2fF6Cf828F8963448C9570A2F2F7D20627", [
