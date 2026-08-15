@@ -2,12 +2,28 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Sparkles, ShieldCheck, Layers, Wallet, ExternalLink, LogOut, ChevronDown } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Sparkles, ShieldCheck, Layers, Wallet, ExternalLink, LogOut, ChevronDown, Compass } from 'lucide-react';
 import { useWeb3, OG_NETWORKS } from '../context/Web3Context';
 import { CONTRACT_ADDRESSES } from '../config/contracts';
+import KitsuneLogoMark from './KitsuneLogoMark';
 
 export default function Navbar() {
-  const { account, chainId, balance, isConnected, isConnecting, connectWallet, openWalletModal, disconnectWallet, switchTo0GNetwork, activeNetwork } = useWeb3();
+  const pathname = usePathname();
+  const router = useRouter();
+  const {
+    account,
+    chainId,
+    balance,
+    isConnected,
+    isConnecting,
+    openWalletModal,
+    disconnectWallet,
+    switchTo0GNetwork,
+    activeNetwork,
+    gateNavigation
+  } = useWeb3();
+
   const [showNetworkMenu, setShowNetworkMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -17,57 +33,104 @@ export default function Navbar() {
   const isGalileo = chainId === OG_NETWORKS.galileo.chainId;
   const isLocalhost = chainId === OG_NETWORKS.localhost.chainId;
 
+  // Intercept navigation link clicks if wallet connection is required
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string, requiresWallet = false) => {
+    e.preventDefault();
+    if (!requiresWallet) {
+      router.push(href);
+      return;
+    }
+
+    const canProceed = gateNavigation(href);
+    if (canProceed) {
+      router.push(href);
+    }
+  };
+
   return (
-    <header className="sticky top-0 z-50 zen-glass border-b border-zen-cardBorder px-6 py-4">
+    <header className="sticky top-0 z-50 zen-glass border-b border-zen-cardBorder px-6 py-3.5 transition-all duration-300">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        
+
         {/* Brand Logo & Name */}
         <Link href="/" className="flex items-center space-x-3 group">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-zen-gold to-zen-vermilion p-0.5 shadow-lg group-hover:lantern-glow transition-all duration-300">
-            <div className="w-full h-full bg-zen-bg rounded-[7px] flex items-center justify-center">
-              <span className="text-zen-gold font-serif text-xl font-bold">狐</span>
-            </div>
-          </div>
+          <KitsuneLogoMark size={34} className="group-hover:scale-105 transition-transform duration-300" />
           <div>
             <div className="flex items-center space-x-2">
-              <span className="font-serif text-xl font-bold text-zen-paper tracking-wide group-hover:text-zen-gold transition-colors">
+              <span className="font-serif text-lg font-bold text-zen-paper tracking-wide group-hover:text-zen-gold transition-colors">
                 KITSUNE
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-zen-moss/40 text-zen-paper border border-zen-mossLight font-mono">
+              <span className="text-[9px] px-2 py-0.5 rounded-full bg-zen-moss/40 text-zen-paper border border-zen-mossLight font-mono">
                 ERC-7857
               </span>
             </div>
-            <p className="text-[11px] text-zen-muted font-sans tracking-wider uppercase">0G Verifiable Agent Marketplace</p>
+            <p className="text-[10px] text-zen-muted font-sans tracking-wider uppercase">0G Verifiable Agent Shell</p>
           </div>
         </Link>
 
         {/* Center Navigation Links */}
-        <nav className="hidden md:flex items-center space-x-8 text-sm font-medium">
-          <Link href="/" className="text-zen-paper hover:text-zen-gold transition-colors flex items-center space-x-1.5">
+        <nav className="hidden md:flex items-center space-x-2 text-sm font-medium">
+
+          <a
+            href="/"
+            onClick={(e) => handleNavClick(e, '/', false)}
+            className={`px-3.5 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 ${pathname === '/'
+                ? 'bg-zen-gold/15 text-zen-gold font-semibold border border-zen-gold/30 lantern-glow'
+                : 'text-zen-muted hover:text-zen-paper hover:bg-zen-card/50'
+              }`}
+          >
+            <Compass className="w-4 h-4 text-zen-gold" />
+            <span>Home</span>
+          </a>
+
+          <a
+            href="/marketplace"
+            onClick={(e) => handleNavClick(e, '/marketplace', false)}
+            className={`px-3.5 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 ${pathname === '/marketplace'
+                ? 'bg-zen-gold/15 text-zen-gold font-semibold border border-zen-gold/30 lantern-glow'
+                : 'text-zen-muted hover:text-zen-paper hover:bg-zen-card/50'
+              }`}
+          >
             <Layers className="w-4 h-4 text-zen-gold" />
             <span>Marketplace</span>
-          </Link>
-          <Link href="/mint" className="text-zen-muted hover:text-zen-gold transition-colors flex items-center space-x-1.5">
+          </a>
+
+          <a
+            href="/mint"
+            onClick={(e) => handleNavClick(e, '/mint', true)}
+            className={`px-3.5 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 ${pathname === '/mint'
+                ? 'bg-zen-gold/15 text-zen-gold font-semibold border border-zen-gold/30 lantern-glow'
+                : 'text-zen-muted hover:text-zen-paper hover:bg-zen-card/50'
+              }`}
+          >
             <Sparkles className="w-4 h-4 text-zen-gold" />
             <span>Mint Agentic ID</span>
-          </Link>
-          <Link href="/audit" className="text-zen-muted hover:text-zen-gold transition-colors flex items-center space-x-1.5">
+          </a>
+
+          <a
+            href="/audit"
+            onClick={(e) => handleNavClick(e, '/audit', false)}
+            className={`px-3.5 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 ${pathname === '/audit'
+                ? 'bg-zen-gold/15 text-zen-gold font-semibold border border-zen-gold/30 lantern-glow'
+                : 'text-zen-muted hover:text-zen-paper hover:bg-zen-card/50'
+              }`}
+          >
             <ShieldCheck className="w-4 h-4 text-zen-gold" />
             <span>0G Audit Trail</span>
-          </Link>
+          </a>
+
         </nav>
 
         {/* Right Section: Network Selector & Connect Wallet */}
         <div className="flex items-center space-x-3">
-          
+
           {/* Network Selector Dropdown */}
           <div className="relative">
             <button
               onClick={() => setShowNetworkMenu(!showNetworkMenu)}
-              className="hidden sm:flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-zen-card border border-zen-cardBorder text-xs text-zen-paper hover:border-zen-gold transition-colors"
+              className="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-zen-card border border-zen-cardBorder text-xs text-zen-paper hover:border-zen-gold transition-colors"
             >
               <span className={`w-2 h-2 rounded-full ${isAristotle || isGalileo || isLocalhost ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`}></span>
-              <span className="font-mono">
+              <span className="font-mono text-[11px]">
                 {isAristotle ? '0G-Aristotle (16661)' : isGalileo ? '0G-Galileo (16601)' : isLocalhost ? 'Localhost (31337)' : chainId ? `Chain ${chainId}` : '0G-Aristotle (16661)'}
               </span>
               <ChevronDown className="w-3 h-3 text-zen-muted" />
@@ -78,7 +141,7 @@ export default function Navbar() {
                 <div className="px-3 py-1.5 text-[10px] uppercase font-serif text-zen-muted border-b border-zen-cardBorder">
                   Select Network
                 </div>
-                
+
                 <button
                   onClick={() => { switchTo0GNetwork('aristotle'); setShowNetworkMenu(false); }}
                   className="w-full text-left px-3 py-2 rounded-lg hover:bg-zen-slate flex items-center justify-between text-zen-paper transition-colors"
@@ -120,10 +183,10 @@ export default function Navbar() {
             <div className="relative">
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center space-x-2.5 px-4 py-2 rounded-lg bg-zen-moss/40 border border-zen-mossLight text-zen-paper text-sm font-mono hover:bg-zen-moss/60 transition-all"
+                className="flex items-center space-x-2 px-3.5 py-1.5 rounded-lg bg-zen-moss/40 border border-zen-mossLight text-zen-paper text-xs font-mono hover:bg-zen-moss/60 transition-all"
               >
                 {balance && (
-                  <span className="text-zen-gold font-semibold text-xs border-r border-zen-cardBorder pr-2">
+                  <span className="text-zen-gold font-semibold text-[11px] border-r border-zen-cardBorder pr-2">
                     {parseFloat(balance).toFixed(3)} 0G
                   </span>
                 )}
@@ -155,11 +218,11 @@ export default function Navbar() {
             </div>
           ) : (
             <button
-              onClick={openWalletModal}
+              onClick={() => openWalletModal()}
               disabled={isConnecting}
-              className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gradient-to-r from-zen-gold to-amber-600 text-zen-ink font-semibold text-sm hover:lantern-glow transition-all duration-300 shadow-md disabled:opacity-50"
+              className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gradient-to-r from-zen-gold to-amber-600 text-zen-ink font-semibold text-xs hover:lantern-glow transition-all duration-300 shadow-md disabled:opacity-50"
             >
-              <Wallet className="w-4 h-4" />
+              <Wallet className="w-3.5 h-3.5" />
               <span>{isConnecting ? 'Connecting...' : 'Connect Wallet'}</span>
             </button>
           )}

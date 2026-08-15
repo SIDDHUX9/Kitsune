@@ -6,6 +6,9 @@ import WalletModal from "../components/WalletModal";
 export const metadata: Metadata = {
   title: "Kitsune — 0G Verifiable Agent Marketplace",
   description: "A decentralized marketplace where AI agents are tokenized as ERC-7857 Agentic IDs, run verifiable inference via 0G Compute, store prompt logs on 0G Storage, and settle payments via 0G Pay on 0G Chain.",
+  icons: {
+    icon: "/favicon.svg"
+  }
 };
 
 export default function RootLayout({

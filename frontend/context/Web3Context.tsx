@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ethers } from 'ethers';
+import { useRouter } from 'next/navigation';
 import { CONTRACT_ADDRESSES, AGENTIC_ID_ABI, MARKETPLACE_ABI } from '../config/contracts';
 
 export const OG_NETWORKS = {
@@ -56,11 +57,13 @@ interface Web3ContextType {
   provider: ethers.BrowserProvider | ethers.JsonRpcProvider | null;
   signer: ethers.Signer | null;
   isModalOpen: boolean;
-  openWalletModal: () => void;
+  pendingRoute: string | null;
+  openWalletModal: (route?: string) => void;
   closeWalletModal: () => void;
   connectWallet: () => Promise<void>;
   connectDemoMode: () => void;
   disconnectWallet: () => void;
+  gateNavigation: (targetRoute: string) => boolean;
   switchTo0GNetwork: (networkKey: NetworkKey) => Promise<void>;
   mintAgenticIDOnChain: (storageHash: string, modelRef: string, metadataURI: string) => Promise<{ tokenId: number; txHash: string; blockNumber: number }>;
   requestInferenceOnChain: (listingId: number, inputHash: string, priceEther: string) => Promise<{ requestId: number; txHash: string; blockNumber: number }>;
@@ -78,11 +81,13 @@ const Web3Context = createContext<Web3ContextType>({
   provider: null,
   signer: null,
   isModalOpen: false,
+  pendingRoute: null,
   openWalletModal: () => {},
   closeWalletModal: () => {},
   connectWallet: async () => {},
   connectDemoMode: () => {},
   disconnectWallet: () => {},
+  gateNavigation: () => false,
   switchTo0GNetwork: async () => {},
   mintAgenticIDOnChain: async () => ({ tokenId: 1, txHash: "0x...", blockNumber: 1 }),
   requestInferenceOnChain: async () => ({ requestId: 1, txHash: "0x...", blockNumber: 1 }),
@@ -90,6 +95,7 @@ const Web3Context = createContext<Web3ContextType>({
 });
 
 export function Web3Provider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const [account, setAccount] = useState<string | null>(null);
   const [chainId, setChainId] = useState<number | null>(16602);
   const [balance, setBalance] = useState<string | null>(null);
@@ -100,13 +106,35 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
   const [provider, setProvider] = useState<ethers.BrowserProvider | ethers.JsonRpcProvider | null>(null);
   const [signer, setSigner] = useState<ethers.Signer | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [pendingRoute, setPendingRoute] = useState<string | null>(null);
 
-  const openWalletModal = () => setIsModalOpen(true);
-  const closeWalletModal = () => setIsModalOpen(false);
+  const openWalletModal = (targetRoute?: string) => {
+    if (targetRoute) {
+      setPendingRoute(targetRoute);
+    }
+    setIsModalOpen(true);
+  };
 
-  // Check if wallet is already authorized
+  const closeWalletModal = () => {
+    setIsModalOpen(false);
+  };
+
+  // Process pending navigation route after successful connection
+  const handlePostConnectNavigation = () => {
+    if (pendingRoute) {
+      const target = pendingRoute;
+      setPendingRoute(null);
+      router.push(target);
+    }
+  };
+
+  // Check if wallet is already authorized or persisted in localStorage
   useEffect(() => {
-    if (typeof window !== 'undefined' && (window as any).ethereum) {
+    if (typeof window === 'undefined') return;
+
+    const isPersisted = localStorage.getItem('kitsune_wallet_connected') === 'true';
+
+    if ((window as any).ethereum) {
       const browserProvider = new ethers.BrowserProvider((window as any).ethereum);
       setProvider(browserProvider);
 
@@ -121,8 +149,34 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
           setChainId(Number(network.chainId));
           setBalance(ethers.formatEther(userBalance));
           setIsConnected(true);
+          localStorage.setItem('kitsune_wallet_connected', 'true');
+        } else if (isPersisted) {
+          // Attempt eager request if user previously authorized
+          browserProvider.send("eth_requestAccounts", []).then(async (accs: string[]) => {
+            if (accs.length > 0) {
+              const userSigner = await browserProvider.getSigner();
+              const network = await browserProvider.getNetwork();
+              const userBalance = await browserProvider.getBalance(accs[0]);
+
+              setAccount(accs[0]);
+              setSigner(userSigner);
+              setChainId(Number(network.chainId));
+              setBalance(ethers.formatEther(userBalance));
+              setIsConnected(true);
+            }
+          }).catch(() => {
+            localStorage.removeItem('kitsune_wallet_connected');
+          });
         }
       }).catch(err => console.debug("Auto-connect check:", err));
+    } else if (isPersisted) {
+      // Demo mode fallback persistence
+      setAccount("0x71C8a9F0d12B9442008E");
+      setBalance("12.500");
+      setChainId(16661);
+      setIsConnected(true);
+      const defaultRpcProvider = new ethers.JsonRpcProvider(OG_NETWORKS.aristotle.rpcUrls[0]);
+      setProvider(defaultRpcProvider);
     } else {
       const defaultRpcProvider = new ethers.JsonRpcProvider(OG_NETWORKS.aristotle.rpcUrls[0]);
       setProvider(defaultRpcProvider);
@@ -149,7 +203,9 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
           setChainId(Number(network.chainId));
           setBalance(ethers.formatEther(userBalance));
           setIsConnected(true);
+          localStorage.setItem('kitsune_wallet_connected', 'true');
           closeWalletModal();
+          handlePostConnectNavigation();
         } else {
           setWalletError("No accounts selected in your Web3 wallet.");
         }
@@ -171,7 +227,11 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     setChainId(16661);
     setIsConnected(true);
     setWalletError(null);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('kitsune_wallet_connected', 'true');
+    }
     closeWalletModal();
+    handlePostConnectNavigation();
   };
 
   const disconnectWallet = () => {
@@ -180,6 +240,20 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     setIsConnected(false);
     setBalance(null);
     setWalletError(null);
+    setPendingRoute(null);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('kitsune_wallet_connected');
+    }
+  };
+
+  // Helper function to intercept navigation if wallet is not connected
+  const gateNavigation = (targetRoute: string): boolean => {
+    if (isConnected && account) {
+      return true; // Allow navigation
+    }
+    // Intercept: save pending route and prompt modal
+    openWalletModal(targetRoute);
+    return false; // Intercepted
   };
 
   const switchTo0GNetwork = async (networkKey: NetworkKey) => {
@@ -221,7 +295,6 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
   const mintAgenticIDOnChain = async (storageHash: string, modelRef: string, metadataURI: string) => {
     const config = CONTRACT_ADDRESSES[activeNetwork];
 
-    // Try using connected Web3 wallet first
     if (signer && account) {
       try {
         console.log(`[0G Chain] Submitting mintAgenticID via connected user wallet (${account})...`);
@@ -236,7 +309,6 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    // Gasless 0G Pay Relayer transaction dispatch on 0G Chain
     const relayerWallet = getFallbackRelayerWallet();
     const targetAddress = account || relayerWallet.address;
     const contract = new ethers.Contract(config.agenticID, AGENTIC_ID_ABI, relayerWallet);
@@ -261,7 +333,6 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     const priceNumeric = parseFloat(priceEther) || 0.01;
     const valueWei = ethers.parseEther(priceNumeric.toString());
 
-    // Try using connected Web3 wallet first
     if (signer && account) {
       try {
         console.log(`[0G Chain] Submitting requestInference via connected user wallet (${account})...`);
@@ -275,7 +346,6 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    // Gasless 0G Pay Relayer transaction dispatch on 0G Chain
     const relayerWallet = getFallbackRelayerWallet();
     const contract = new ethers.Contract(config.marketplace, MARKETPLACE_ABI, relayerWallet);
 
@@ -310,6 +380,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
         if (accounts.length > 0) {
           setAccount(accounts[0]);
           setIsConnected(true);
+          localStorage.setItem('kitsune_wallet_connected', 'true');
         } else {
           disconnectWallet();
         }
@@ -341,11 +412,13 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
         provider,
         signer,
         isModalOpen,
+        pendingRoute,
         openWalletModal,
         closeWalletModal,
         connectWallet,
         connectDemoMode,
         disconnectWallet,
+        gateNavigation,
         switchTo0GNetwork,
         mintAgenticIDOnChain,
         requestInferenceOnChain,
