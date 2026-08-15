@@ -89,7 +89,10 @@ export default function AuditPage() {
       const liveRecords: AuditRecord[] = [];
 
       try {
-        const res = await fetch("http://localhost:3001/api/audit-logs");
+        const relayerEndpoint = process.env.NEXT_PUBLIC_RELAYER_URL || "http://localhost:3001";
+        const res = await fetch(`${relayerEndpoint}/api/audit-logs`, {
+          signal: AbortSignal.timeout(3000)
+        });
         if (res.ok) {
           const data = await res.json();
           if (data && data.logs && data.logs.length > 0) {
@@ -111,7 +114,7 @@ export default function AuditPage() {
           }
         }
       } catch (err) {
-        console.debug("Relayer audit log fetch notice:", err);
+        console.debug("Relayer audit log notice (using direct chain fallback):", err);
       }
 
       try {

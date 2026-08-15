@@ -25,9 +25,6 @@ export default function LandingStory({ onEnterMarketplace, onOpenMintModal }: La
   const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
   const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
 
-  const problemOpacity = useTransform(scrollYProgress, [0.15, 0.25, 0.35, 0.42], [0, 1, 1, 0]);
-  const revealOpacity = useTransform(scrollYProgress, [0.4, 0.48, 0.6, 0.68], [0, 1, 1, 0]);
-
   const primitives = [
     {
       id: 1,
@@ -93,34 +90,36 @@ export default function LandingStory({ onEnterMarketplace, onOpenMintModal }: La
       <InkWashBackground />
 
       {/* ========================================================================= */}
-      {/* SCENE 1: OPENING HERO (Full Viewport Narrative) */}
+      {/* SCENE 1: OPENING HERO (Full Viewport Narrative with Dedicated Landscape BG) */}
       {/* ========================================================================= */}
       <motion.section 
         style={shouldReduceMotion ? {} : { opacity: heroOpacity, scale: heroScale }}
-        className="relative min-h-screen flex flex-col items-center justify-between px-6 py-16 text-center z-10"
+        className="relative min-h-screen flex flex-col items-center justify-between px-6 py-16 text-center z-10 overflow-hidden"
       >
-        <div className="my-auto space-y-8 max-w-4xl mx-auto flex flex-col items-center">
+        {/* Japanese Torii Temple Landscape Background (First Section Only) */}
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <img 
+            src="/images/hero_bg.jpg" 
+            alt="Kitsune Japanese Temple Landscape" 
+            className="w-full h-full object-cover object-center opacity-65 scale-105"
+          />
+          {/* Subtle Vignette & Gradient Overlays so Hero text and emblem stand out crisply */}
+          <div className="absolute inset-0 bg-gradient-to-b from-zen-bg/90 via-zen-bg/50 to-zen-bg" />
+          <div className="absolute inset-0 bg-radial from-transparent via-zen-bg/30 to-zen-bg/85" />
+        </div>
+
+        <div className="my-auto space-y-8 max-w-4xl mx-auto flex flex-col items-center relative z-10">
           
           {/* Sacred Calligraphy Emblem Draw */}
           <KitsuneCalligraphyLogo size={180} className="mb-2" />
 
           {/* Title & Subtitle with Zen Typography */}
           <div className="space-y-4">
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="inline-flex items-center space-x-2.5 px-4 py-1.5 rounded-full bg-zen-gold/10 border border-zen-gold/30 text-zen-gold text-xs font-serif tracking-widest uppercase"
-            >
-              <Flame className="w-3.5 h-3.5 text-zen-gold animate-pulse" />
-              <span>Verifiable AI Spirit Standard • ERC-7857</span>
-            </motion.div>
-
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.6 }}
-              className="font-serif text-5xl sm:text-7xl font-bold tracking-tight leading-tight text-zen-paper drop-shadow-lg"
+              className="font-serif text-5xl sm:text-7xl font-bold tracking-tight leading-tight text-zen-paper drop-shadow-2xl"
             >
               K I T S U N E
             </motion.h1>
@@ -129,7 +128,7 @@ export default function LandingStory({ onEnterMarketplace, onOpenMintModal }: La
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.8 }}
-              className="text-lg sm:text-2xl text-zen-paper/90 font-serif italic max-w-2xl mx-auto leading-relaxed"
+              className="text-lg sm:text-2xl text-zen-paper/90 font-serif italic max-w-2xl mx-auto leading-relaxed drop-shadow-md"
             >
               "Where autonomous intelligence finds its true spirit, verified on the decentralized substrate of 0G."
             </motion.p>
@@ -161,7 +160,7 @@ export default function LandingStory({ onEnterMarketplace, onOpenMintModal }: La
             </button>
             <a
               href="#problem-scene"
-              className="px-6 py-3.5 rounded-xl bg-zen-card/80 border border-zen-cardBorder text-zen-paper font-medium text-sm hover:bg-zen-slate transition-colors flex items-center space-x-2"
+              className="px-6 py-3.5 rounded-xl bg-zen-card/80 border border-zen-cardBorder text-zen-paper font-medium text-sm hover:bg-zen-slate transition-colors flex items-center space-x-2 backdrop-blur-md"
             >
               <span>Unfold Narrative</span>
               <ArrowDown className="w-4 h-4 text-zen-gold" />
@@ -174,7 +173,7 @@ export default function LandingStory({ onEnterMarketplace, onOpenMintModal }: La
         <motion.div 
           animate={shouldReduceMotion ? {} : { y: [0, 8, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="flex flex-col items-center space-y-2 text-zen-muted text-xs font-serif tracking-widest uppercase opacity-70"
+          className="flex flex-col items-center space-y-2 text-zen-muted text-xs font-serif tracking-widest uppercase opacity-70 relative z-10"
         >
           <span>Scroll to Explore Story</span>
           <ArrowDown className="w-4 h-4 text-zen-gold" />
@@ -211,7 +210,6 @@ export default function LandingStory({ onEnterMarketplace, onOpenMintModal }: La
               className="zen-glass rounded-2xl p-8 border border-zen-cardBorder hover:border-zen-vermilion/40 transition-colors space-y-6 group"
             >
               <div className="w-14 h-14 rounded-xl bg-zen-vermilion/10 border border-zen-vermilion/30 flex items-center justify-center text-zen-vermilion">
-                {/* Custom Minimalist Vector SVG Line-Art */}
                 <svg className="w-8 h-8 stroke-current fill-none stroke-[1.5]" viewBox="0 0 24 24">
                   <path d="M12 3v3m0 12v3M3 12h3m12 0h3" strokeLinecap="round" />
                   <circle cx="12" cy="12" r="5" strokeDasharray="3 3" />
@@ -337,11 +335,11 @@ export default function LandingStory({ onEnterMarketplace, onOpenMintModal }: La
             {/* Center Glowing Spirit Fox Icon */}
             <div className="relative w-28 h-28 mx-auto flex items-center justify-center">
               <div className="absolute inset-0 bg-zen-gold/20 rounded-full blur-2xl animate-pulse" />
-              <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-zen-gold to-zen-vermilion p-0.5 shadow-2xl">
-                <div className="w-full h-full bg-zen-bg rounded-[14px] flex items-center justify-center">
-                  <span className="text-4xl font-serif text-zen-gold">🦊</span>
-                </div>
-              </div>
+              <img 
+                src="/images/fox_logo.png" 
+                alt="Kitsune Emblem" 
+                className="w-24 h-24 object-contain filter drop-shadow-[0_0_15px_rgba(229,169,60,0.5)]" 
+              />
             </div>
 
             <div className="space-y-3 max-w-xl mx-auto">
