@@ -13,6 +13,11 @@
     "deploy:aristotle": "npm --prefix contracts run deploy:aristotle",
     "deploy:galileo": "npm --prefix contracts run deploy:galileo"
   },
+  "dependencies": {
+    "next": "^14.2.35",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
   "workspaces": [
     "contracts",
     "relayer",
