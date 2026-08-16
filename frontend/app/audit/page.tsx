@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar';
+import Footer from '../../components/Footer';
 import ZeroGStatusBar from '../../components/ZeroGStatusBar';
 import { ShieldCheck, Database, Cpu, ExternalLink, Search, CheckCircle2, RefreshCw } from 'lucide-react';
 import { useWeb3 } from '../../context/Web3Context';
@@ -252,6 +253,9 @@ export default function AuditPage() {
         </div>
 
       </main>
+
+      {/* Reusable Footer */}
+      <Footer />
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Navbar from '../../components/Navbar';
+import Footer from '../../components/Footer';
 import ZeroGStatusBar from '../../components/ZeroGStatusBar';
 import { Sparkles, Database, Cpu, ShieldCheck, ArrowRight, CheckCircle2, Link2, ExternalLink } from 'lucide-react';
 import { useWeb3 } from '../../context/Web3Context';
@@ -248,6 +249,9 @@ export default function MintPage() {
         )}
 
       </main>
+
+      {/* Reusable Footer */}
+      <Footer />
     </div>
   );
 }

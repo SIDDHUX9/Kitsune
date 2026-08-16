@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Sparkles, ShieldCheck, Layers, Wallet, ExternalLink, LogOut, ChevronDown, Compass } from 'lucide-react';
+import { Sparkles, ShieldCheck, Layers, Wallet, ExternalLink, LogOut, ChevronDown, Compass, BookOpen } from 'lucide-react';
 import { useWeb3, OG_NETWORKS } from '../context/Web3Context';
 import { CONTRACT_ADDRESSES } from '../config/contracts';
 import KitsuneLogoMark from './KitsuneLogoMark';
@@ -67,55 +67,51 @@ export default function Navbar() {
           </div>
         </Link>
 
-        {/* Center Navigation Links */}
-        <nav className="hidden md:flex items-center space-x-2 text-sm font-medium">
-
-          <a
-            href="/"
-            onClick={(e) => handleNavClick(e, '/', false)}
-            className={`px-3.5 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 ${pathname === '/'
-                ? 'bg-zen-gold/15 text-zen-gold font-semibold border border-zen-gold/30 lantern-glow'
-                : 'text-zen-muted hover:text-zen-paper hover:bg-zen-card/50'
-              }`}
-          >
-            <Compass className="w-4 h-4 text-zen-gold" />
-            <span>Home</span>
-          </a>
+        {/* Center Navigation Links (Clean Text Only) */}
+        <nav className="hidden md:flex items-center space-x-1 lg:space-x-3 xl:space-x-4 text-xs sm:text-sm font-medium tracking-wide">
 
           <a
             href="/marketplace"
             onClick={(e) => handleNavClick(e, '/marketplace', false)}
-            className={`px-3.5 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 ${pathname === '/marketplace'
+            className={`px-3.5 py-1.5 rounded-lg transition-all duration-200 ${pathname === '/marketplace'
                 ? 'bg-zen-gold/15 text-zen-gold font-semibold border border-zen-gold/30 lantern-glow'
                 : 'text-zen-muted hover:text-zen-paper hover:bg-zen-card/50'
               }`}
           >
-            <Layers className="w-4 h-4 text-zen-gold" />
-            <span>Marketplace</span>
+            Marketplace
           </a>
 
           <a
             href="/mint"
             onClick={(e) => handleNavClick(e, '/mint', true)}
-            className={`px-3.5 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 ${pathname === '/mint'
+            className={`px-3.5 py-1.5 rounded-lg transition-all duration-200 ${pathname === '/mint'
                 ? 'bg-zen-gold/15 text-zen-gold font-semibold border border-zen-gold/30 lantern-glow'
                 : 'text-zen-muted hover:text-zen-paper hover:bg-zen-card/50'
               }`}
           >
-            <Sparkles className="w-4 h-4 text-zen-gold" />
-            <span>Mint Agentic ID</span>
+            Mint Agentic ID
           </a>
 
           <a
             href="/audit"
             onClick={(e) => handleNavClick(e, '/audit', false)}
-            className={`px-3.5 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 ${pathname === '/audit'
+            className={`px-3.5 py-1.5 rounded-lg transition-all duration-200 ${pathname === '/audit'
                 ? 'bg-zen-gold/15 text-zen-gold font-semibold border border-zen-gold/30 lantern-glow'
                 : 'text-zen-muted hover:text-zen-paper hover:bg-zen-card/50'
               }`}
           >
-            <ShieldCheck className="w-4 h-4 text-zen-gold" />
-            <span>0G Audit Trail</span>
+            0G Audit Trail
+          </a>
+
+          <a
+            href="/whitepaper"
+            onClick={(e) => handleNavClick(e, '/whitepaper', false)}
+            className={`px-3.5 py-1.5 rounded-lg transition-all duration-200 ${pathname === '/whitepaper'
+                ? 'bg-zen-gold/15 text-zen-gold font-semibold border border-zen-gold/30 lantern-glow'
+                : 'text-zen-muted hover:text-zen-paper hover:bg-zen-card/50'
+              }`}
+          >
+            Whitepaper
           </a>
 
         </nav>

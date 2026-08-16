@@ -6,7 +6,7 @@ import InkWashBackground from './InkWashBackground';
 import KitsuneCalligraphyLogo from './KitsuneCalligraphyLogo';
 import { 
   ShieldAlert, Lock, DollarSign, Sparkles, 
-  Cpu, Database, ShieldCheck, Wallet, Flame, ArrowDown, ChevronRight, Play, CheckCircle2
+  Cpu, Database, ShieldCheck, Wallet, Flame, ArrowDown, ChevronRight, Play, CheckCircle2, Plus
 } from 'lucide-react';
 
 interface LandingStoryProps {
@@ -183,110 +183,145 @@ export default function LandingStory({ onEnterMarketplace, onOpenMintModal }: La
       {/* ========================================================================= */}
       {/* SCENE 2: THE PROBLEM (Broken AI Economy Minimal Line-Art) */}
       {/* ========================================================================= */}
+      {/* ========================================================================= */}
+      {/* SCENE 2: THE PROBLEM (Today's Broken AI-Agent Economy) */}
+      {/* ========================================================================= */}
       <section id="problem-scene" className="relative min-h-screen flex items-center justify-center px-6 py-24 z-10">
-        <div className="max-w-5xl mx-auto space-y-16">
+        <div className="max-w-7xl mx-auto space-y-12 w-full">
           
-          <div className="text-center space-y-4 max-w-2xl mx-auto">
-            <span className="text-xs font-serif tracking-widest text-zen-vermilion uppercase font-semibold">
-              Scene II • The Illusion
-            </span>
-            <h2 className="font-serif text-3xl sm:text-5xl font-bold text-zen-paper">
+          {/* Left-Aligned Header Matching User's Reference Layout */}
+          <div className="text-left space-y-3 max-w-3xl">
+            <h2 className="font-serif text-3xl sm:text-5xl font-bold text-zen-paper tracking-tight">
               Today's Broken AI-Agent Economy
             </h2>
-            <p className="text-zen-muted text-sm sm:text-base leading-relaxed">
-              Modern AI agents operate inside opaque black boxes. Creators build value they cannot own, and users rely on unverified outputs with zero accountability.
+            <p className="text-zen-muted text-sm sm:text-base leading-relaxed font-sans">
+              Centralized platforms create artificial friction, opaque black boxes, and unverified AI outputs.
             </p>
           </div>
 
-          {/* 3 Minimal Animated SVG Line-Art Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* 3-Column Card Grid Matching User's Reference Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
             
-            {/* Card 1: Untrusted Outputs */}
+            {/* Card 1: Untrusted Inference */}
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className="zen-glass rounded-2xl p-8 border border-zen-cardBorder hover:border-zen-vermilion/40 transition-colors space-y-6 group"
+              className="bg-zen-card/40 backdrop-blur-md rounded-[22px] p-4 sm:p-5 border border-zen-cardBorder hover:border-zen-gold/40 transition-all duration-300 shadow-xl flex flex-col justify-between group"
             >
-              <div className="w-14 h-14 rounded-xl bg-zen-vermilion/10 border border-zen-vermilion/30 flex items-center justify-center text-zen-vermilion">
-                <svg className="w-8 h-8 stroke-current fill-none stroke-[1.5]" viewBox="0 0 24 24">
-                  <path d="M12 3v3m0 12v3M3 12h3m12 0h3" strokeLinecap="round" />
-                  <circle cx="12" cy="12" r="5" strokeDasharray="3 3" />
-                  <path d="M7.5 7.5l2 2m5 5l2 2" strokeLinecap="round" />
-                </svg>
+              {/* Graphic Preview Area */}
+              <div className="h-44 sm:h-52 w-full rounded-2xl overflow-hidden bg-zen-card/80 border border-zen-cardBorder/60 relative mb-5">
+                <img 
+                  src="/images/broken_blackbox.jpg" 
+                  alt="Opaque Black Box Execution" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-85"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-zen-bg/90 via-transparent to-transparent" />
+                <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-zen-bg/80 backdrop-blur-md border border-zen-vermilion/40 text-zen-vermilion text-[10px] font-mono font-semibold">
+                  Zero Verifiability
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <h3 className="font-serif text-xl font-bold text-zen-paper group-hover:text-zen-vermilion transition-colors">
-                  Untrusted Inference
-                </h3>
-                <p className="text-xs text-zen-muted leading-relaxed font-sans">
-                  Centralized API providers can silently alter prompts, downgrade models, or fake output tokens with zero cryptographic proof.
-                </p>
-              </div>
+              {/* Text & Action Footer */}
+              <div className="space-y-3 px-1 pb-1 flex-1 flex flex-col justify-between">
+                <div className="space-y-2">
+                  <h3 className="font-serif text-xl sm:text-2xl font-bold text-zen-paper group-hover:text-zen-gold transition-colors">
+                    Untrusted Inference
+                  </h3>
+                  <p className="text-xs sm:text-sm text-zen-muted leading-relaxed font-sans">
+                    Centralized API providers can silently alter prompts, downgrade models, or fake output tokens with zero cryptographic proof.
+                  </p>
+                </div>
 
-              <div className="pt-2 text-[11px] font-mono text-zen-vermilion/80 flex items-center space-x-1">
-                <span>• Zero Verifiability</span>
+                <div className="flex items-center justify-between pt-4 border-t border-zen-cardBorder/40">
+                  <span className="text-[11px] font-mono text-zen-vermilion font-medium">Opaque Black Boxes</span>
+                  <div className="w-8 h-8 rounded-full border border-zen-cardBorder flex items-center justify-center text-zen-muted group-hover:border-zen-gold group-hover:text-zen-gold transition-colors">
+                    <Plus className="w-4 h-4" />
+                  </div>
+                </div>
               </div>
             </motion.div>
 
-            {/* Card 2: No True Ownership */}
+            {/* Card 2: Zero Asset Ownership */}
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="zen-glass rounded-2xl p-8 border border-zen-cardBorder hover:border-zen-vermilion/40 transition-colors space-y-6 group"
+              className="bg-zen-card/40 backdrop-blur-md rounded-[22px] p-4 sm:p-5 border border-zen-cardBorder hover:border-zen-gold/40 transition-all duration-300 shadow-xl flex flex-col justify-between group"
             >
-              <div className="w-14 h-14 rounded-xl bg-zen-vermilion/10 border border-zen-vermilion/30 flex items-center justify-center text-zen-vermilion">
-                <svg className="w-8 h-8 stroke-current fill-none stroke-[1.5]" viewBox="0 0 24 24">
-                  <rect x="4" y="8" width="16" height="12" rx="2" />
-                  <path d="M8 8V6a4 4 0 018 0v2" strokeDasharray="2 2" />
-                  <circle cx="12" cy="14" r="1.5" />
-                </svg>
+              {/* Graphic Preview Area */}
+              <div className="h-44 sm:h-52 w-full rounded-2xl overflow-hidden bg-zen-card/80 border border-zen-cardBorder/60 relative mb-5">
+                <img 
+                  src="/images/broken_memory.jpg" 
+                  alt="Ephemeral Memory & Vendor Lock-in" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-85"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-zen-bg/90 via-transparent to-transparent" />
+                <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-zen-bg/80 backdrop-blur-md border border-zen-vermilion/40 text-zen-vermilion text-[10px] font-mono font-semibold">
+                  Vendor Lock-In
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <h3 className="font-serif text-xl font-bold text-zen-paper group-hover:text-zen-vermilion transition-colors">
-                  Zero Agent Ownership
-                </h3>
-                <p className="text-xs text-zen-muted leading-relaxed font-sans">
-                  Agents hosted on cloud platforms can be deactivated or copied overnight. Creators hold no transferable, liquid asset for their prompts.
-                </p>
-              </div>
+              {/* Text & Action Footer */}
+              <div className="space-y-3 px-1 pb-1 flex-1 flex flex-col justify-between">
+                <div className="space-y-2">
+                  <h3 className="font-serif text-xl sm:text-2xl font-bold text-zen-paper group-hover:text-zen-gold transition-colors">
+                    Zero Asset Ownership
+                  </h3>
+                  <p className="text-xs sm:text-sm text-zen-muted leading-relaxed font-sans">
+                    Agents hosted on cloud platforms can be deactivated or copied overnight. Creators hold no transferable, liquid asset for their prompts.
+                  </p>
+                </div>
 
-              <div className="pt-2 text-[11px] font-mono text-zen-vermilion/80 flex items-center space-x-1">
-                <span>• Vendor Lock-In</span>
+                <div className="flex items-center justify-between pt-4 border-t border-zen-cardBorder/40">
+                  <span className="text-[11px] font-mono text-zen-vermilion font-medium">Locked-In Identity</span>
+                  <div className="w-8 h-8 rounded-full border border-zen-cardBorder flex items-center justify-center text-zen-muted group-hover:border-zen-gold group-hover:text-zen-gold transition-colors">
+                    <Plus className="w-4 h-4" />
+                  </div>
+                </div>
               </div>
             </motion.div>
 
-            {/* Card 3: Opaque Micropayments */}
+            {/* Card 3: Opaque Payments */}
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8, delay: 0.5 }}
-              className="zen-glass rounded-2xl p-8 border border-zen-cardBorder hover:border-zen-vermilion/40 transition-colors space-y-6 group"
+              className="bg-zen-card/40 backdrop-blur-md rounded-[22px] p-4 sm:p-5 border border-zen-cardBorder hover:border-zen-gold/40 transition-all duration-300 shadow-xl flex flex-col justify-between group"
             >
-              <div className="w-14 h-14 rounded-xl bg-zen-vermilion/10 border border-zen-vermilion/30 flex items-center justify-center text-zen-vermilion">
-                <svg className="w-8 h-8 stroke-current fill-none stroke-[1.5]" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="M15 9l-6 6m0-6h6v6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+              {/* Graphic Preview Area */}
+              <div className="h-44 sm:h-52 w-full rounded-2xl overflow-hidden bg-zen-card/80 border border-zen-cardBorder/60 relative mb-5">
+                <img 
+                  src="/images/broken_revenue.jpg" 
+                  alt="High Friction Micropayments" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-85"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-zen-bg/90 via-transparent to-transparent" />
+                <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-zen-bg/80 backdrop-blur-md border border-zen-vermilion/40 text-zen-vermilion text-[10px] font-mono font-semibold">
+                  High Friction
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <h3 className="font-serif text-xl font-bold text-zen-paper group-hover:text-zen-vermilion transition-colors">
-                  Opaque Payments
-                </h3>
-                <p className="text-xs text-zen-muted leading-relaxed font-sans">
-                  Heavy intermediary fees, monthly subscriptions, and manual invoice reconciliations prevent real-time autonomous machine transactions.
-                </p>
-              </div>
+              {/* Text & Action Footer */}
+              <div className="space-y-3 px-1 pb-1 flex-1 flex flex-col justify-between">
+                <div className="space-y-2">
+                  <h3 className="font-serif text-xl sm:text-2xl font-bold text-zen-paper group-hover:text-zen-gold transition-colors">
+                    Opaque Payments
+                  </h3>
+                  <p className="text-xs sm:text-sm text-zen-muted leading-relaxed font-sans">
+                    Heavy intermediary fees, monthly subscriptions, and manual invoice reconciliations prevent real-time autonomous machine transactions.
+                  </p>
+                </div>
 
-              <div className="pt-2 text-[11px] font-mono text-zen-vermilion/80 flex items-center space-x-1">
-                <span>• High Friction</span>
+                <div className="flex items-center justify-between pt-4 border-t border-zen-cardBorder/40">
+                  <span className="text-[11px] font-mono text-zen-vermilion font-medium">Siloed Monetization</span>
+                  <div className="w-8 h-8 rounded-full border border-zen-cardBorder flex items-center justify-center text-zen-muted group-hover:border-zen-gold group-hover:text-zen-gold transition-colors">
+                    <Plus className="w-4 h-4" />
+                  </div>
+                </div>
               </div>
             </motion.div>
 
@@ -503,9 +538,18 @@ export default function LandingStory({ onEnterMarketplace, onOpenMintModal }: La
       {/* ========================================================================= */}
       {/* SCENE 5: CALL TO ACTION (Final Scene - Enter Marketplace & Ink Settling) */}
       {/* ========================================================================= */}
-      <section className="relative min-h-[80vh] flex items-center justify-center px-6 py-24 z-10 border-t border-zen-cardBorder/40">
+      <section className="relative min-h-[85vh] flex items-center justify-center px-6 py-28 z-10 border-t border-zen-cardBorder/40 overflow-hidden">
         
-        <div className="max-w-3xl mx-auto text-center space-y-8">
+        {/* Golden Portal Artwork Background Image */}
+        <div 
+          className="absolute inset-0 z-0 bg-cover bg-center opacity-70 pointer-events-none"
+          style={{ backgroundImage: "url('/images/portal_cta_bg.png')" }}
+        />
+        {/* Gradients for smooth blending into surrounding dark theme */}
+        <div className="absolute inset-0 z-0 bg-gradient-to-t from-zen-bg via-zen-bg/40 to-zen-bg/70 pointer-events-none" />
+        <div className="absolute inset-0 z-0 bg-gradient-to-r from-zen-bg/80 via-transparent to-zen-bg/80 pointer-events-none" />
+
+        <div className="relative z-10 max-w-3xl mx-auto text-center space-y-8">
           
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
@@ -514,15 +558,11 @@ export default function LandingStory({ onEnterMarketplace, onOpenMintModal }: La
             transition={{ duration: 0.8 }}
             className="space-y-4"
           >
-            <div className="w-16 h-16 rounded-2xl bg-zen-gold/10 border border-zen-gold/30 flex items-center justify-center text-zen-gold mx-auto lantern-glow">
-              <Flame className="w-8 h-8 animate-pulse" />
-            </div>
-
-            <h2 className="font-serif text-4xl sm:text-6xl font-bold text-zen-paper">
+            <h2 className="font-serif text-4xl sm:text-6xl font-bold text-zen-paper drop-shadow-2xl">
               Step Into The Marketplace
             </h2>
             
-            <p className="text-zen-muted text-base sm:text-lg max-w-xl mx-auto font-serif italic">
+            <p className="text-zen-paper/90 text-base sm:text-xl max-w-xl mx-auto font-serif italic drop-shadow-md">
               "The ink has settled. Explore autonomous agents or mint your own ERC-7857 Agentic ID today."
             </p>
           </motion.div>
@@ -539,7 +579,7 @@ export default function LandingStory({ onEnterMarketplace, onOpenMintModal }: La
             {onOpenMintModal && (
               <button
                 onClick={onOpenMintModal}
-                className="px-8 py-4 rounded-xl bg-zen-card border border-zen-cardBorder text-zen-paper font-semibold text-sm hover:border-zen-gold hover:bg-zen-slate transition-all flex items-center space-x-2"
+                className="px-8 py-4 rounded-xl bg-zen-card/80 backdrop-blur-md border border-zen-cardBorder text-zen-paper font-semibold text-sm hover:border-zen-gold hover:bg-zen-slate transition-all flex items-center space-x-2"
               >
                 <Sparkles className="w-4 h-4 text-zen-gold" />
                 <span>Mint Agentic ID</span>

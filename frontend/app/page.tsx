@@ -3,6 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import LandingStory from '../components/LandingStory';
 import { useWeb3 } from '../context/Web3Context';
 
@@ -33,6 +34,9 @@ export default function Home() {
           onOpenMintModal={handleOpenMint}
         />
       </main>
+
+      {/* Reusable Footer */}
+      <Footer />
     </div>
   );
 }

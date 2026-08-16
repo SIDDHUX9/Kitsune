@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Navbar from '../../components/Navbar';
+import Footer from '../../components/Footer';
 import ZeroGStatusBar from '../../components/ZeroGStatusBar';
 import { Search, ShieldCheck, Database, Cpu, ArrowUpRight, Copy, Check, Sparkles } from 'lucide-react';
 import { useWeb3 } from '../../context/Web3Context';
@@ -303,21 +304,8 @@ export default function MarketplacePage() {
 
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-zen-cardBorder bg-zen-card/40 py-8 px-6 mt-16 relative z-10">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zen-muted">
-          <div className="flex items-center space-x-2 font-serif text-zen-paper">
-            <span>KITSUNE 0G Marketplace</span>
-            <span>•</span>
-            <span className="font-sans text-zen-muted">Powered by 0G Chain, Compute, Storage, Agentic ID & Pay</span>
-          </div>
-
-          <div className="flex items-center space-x-6">
-            <a href={explorerUrl} target="_blank" rel="noreferrer" className="hover:text-zen-gold transition-colors">0G Chainscan Explorer</a>
-            <a href="https://docs.0g.ai" target="_blank" rel="noreferrer" className="hover:text-zen-gold transition-colors">0G Developer Hub</a>
-          </div>
-        </div>
-      </footer>
+      {/* Reusable Footer */}
+      <Footer />
     </div>
   );
 }

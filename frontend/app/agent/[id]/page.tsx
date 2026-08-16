@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Navbar from '../../../components/Navbar';
+import Footer from '../../../components/Footer';
 import ZeroGStatusBar from '../../../components/ZeroGStatusBar';
 import { 
   ShieldCheck, Database, Cpu, CreditCard, CheckCircle2, 
@@ -379,6 +380,9 @@ export default function AgentStudioPage() {
         </div>
 
       </main>
+
+      {/* Reusable Footer */}
+      <Footer />
     </div>
   );
 }
