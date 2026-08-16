@@ -19,8 +19,8 @@ export const OG_NETWORKS = {
     }
   },
   galileo: {
-    chainIdHex: "0x40DA", // 16602
-    chainId: 16602,
+    chainIdHex: "0x40D9", // 16601
+    chainId: 16601,
     chainName: "0G-Galileo (Testnet)",
     rpcUrls: ["http://evmrpc-testnet.0g.ai"],
     blockExplorerUrls: ["https://chainscan-galileo.0g.ai"],
@@ -97,7 +97,7 @@ const Web3Context = createContext<Web3ContextType>({
 export function Web3Provider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [account, setAccount] = useState<string | null>(null);
-  const [chainId, setChainId] = useState<number | null>(16602);
+  const [chainId, setChainId] = useState<number | null>(16601);
   const [balance, setBalance] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [isConnecting, setIsConnecting] = useState<boolean>(false);

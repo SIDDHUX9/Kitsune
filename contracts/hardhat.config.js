@@ -20,7 +20,7 @@ module.exports = {
     // 0G Testnet - Galileo
     galileo: {
       url: process.env.OG_GALILEO_RPC || "http://evmrpc-testnet.0g.ai",
-      chainId: 16602,
+      chainId: 16601,
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
     },
     // 0G Mainnet - Aristotle

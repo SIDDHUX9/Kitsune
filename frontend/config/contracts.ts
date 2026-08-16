@@ -6,7 +6,7 @@ export const CONTRACT_ADDRESSES = {
     rpc: "https://evmrpc.0g.ai",
     explorer: "https://chainscan-galileo.0g.ai"
   },
-  // 0G-Galileo Testnet (Chain ID 16602 / 16601)
+  // 0G-Galileo Testnet (Chain ID 16601)
   galileo: {
     agenticID: process.env.NEXT_PUBLIC_GALILEO_AGENTIC_ID || "0x91EcD796b55B815719117A8530e3bed138c89bCb",
     marketplace: process.env.NEXT_PUBLIC_GALILEO_MARKETPLACE || "0x9F98Ea2fF6Cf828F8963448C9570A2F2F7D20627",

@@ -8,7 +8,7 @@ This document provides exact reference links, network endpoints, contract events
 
 | Network Element | Mainnet (`0G-Aristotle`) | Testnet (`0G-Galileo`) | Local Dev (`Hardhat`) |
 | :--- | :--- | :--- | :--- |
-| **Chain ID** | `16661` | `16602` | `31337` |
+| **Chain ID** | `16661` | `16601` | `31337` |
 | **RPC Endpoint** | `https://evmrpc.0g.ai` | `http://evmrpc-testnet.0g.ai` | `http://127.0.0.1:8545` |
 | **Explorer** | [chainscan.0g.ai](https://chainscan.0g.ai) | [chainscan-galileo.0g.ai](https://chainscan-galileo.0g.ai) | N/A |
 | **Native Token** | 0G | 0G | ETH / 0G |
