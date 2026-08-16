@@ -91,21 +91,50 @@ async function main() {
   }
 
   // Save deployed addresses JSON
-  const deploymentRecord = {
+  const networkKey = chainId === 16661 ? "aristotle" : (chainId === 16601 ? "galileo" : "localhost");
+  const explorerBase = chainId === 16661 ? "https://chainscan.0g.ai" : "https://chainscan-galileo.0g.ai";
+
+  const outputPath = path.join(__dirname, "../deployed-contracts.json");
+  let deploymentRecordMap = {};
+  if (fs.existsSync(outputPath)) {
+    try {
+      deploymentRecordMap = JSON.parse(fs.readFileSync(outputPath, "utf8"));
+    } catch (e) {}
+  }
+
+  deploymentRecordMap[networkKey] = {
     chainId,
     deployer: deployer.address,
     agenticID: agenticIDAddress,
     marketplace: marketplaceAddress,
     timestamp: new Date().toISOString(),
     explorerLinks: {
-      agenticID: `https://chainscan.0g.ai/address/${agenticIDAddress}`,
-      marketplace: `https://chainscan.0g.ai/address/${marketplaceAddress}`
+      agenticID: `${explorerBase}/address/${agenticIDAddress}`,
+      marketplace: `${explorerBase}/address/${marketplaceAddress}`
     }
   };
 
-  const outputPath = path.join(__dirname, "../deployed-contracts.json");
-  fs.writeFileSync(outputPath, JSON.stringify(deploymentRecord, null, 2));
+  fs.writeFileSync(outputPath, JSON.stringify(deploymentRecordMap, null, 2));
   console.log(`\nDeployment details written to: ${outputPath}`);
+
+  // Update frontend config/contracts.ts
+  const frontendConfigPath = path.join(__dirname, "../frontend/config/contracts.ts");
+  if (fs.existsSync(frontendConfigPath)) {
+    let content = fs.readFileSync(frontendConfigPath, "utf8");
+    if (networkKey === "aristotle") {
+      content = content.replace(
+        /aristotle:\s*\{[\s\S]*?\},/,
+        `aristotle: {\n    agenticID: process.env.NEXT_PUBLIC_ARISTOTLE_AGENTIC_ID || "${agenticIDAddress}",\n    marketplace: process.env.NEXT_PUBLIC_ARISTOTLE_MARKETPLACE || "${marketplaceAddress}",\n    rpc: "https://evmrpc.0g.ai",\n    explorer: "https://chainscan.0g.ai"\n  },`
+      );
+    } else if (networkKey === "galileo") {
+      content = content.replace(
+        /galileo:\s*\{[\s\S]*?\},/,
+        `galileo: {\n    agenticID: process.env.NEXT_PUBLIC_GALILEO_AGENTIC_ID || "${agenticIDAddress}",\n    marketplace: process.env.NEXT_PUBLIC_GALILEO_MARKETPLACE || "${marketplaceAddress}",\n    rpc: "http://evmrpc-testnet.0g.ai",\n    explorer: "https://chainscan-galileo.0g.ai"\n  },`
+      );
+    }
+    fs.writeFileSync(frontendConfigPath, content);
+    console.log(`Updated frontend contracts config: ${frontendConfigPath}`);
+  }
 
   console.log("\n=================================================");
   console.log(" DEPLOYMENT COMPLETE!");
