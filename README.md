@@ -1,4 +1,6 @@
 # Kitsune  0G Verifiable Agent Marketplace 狐
+<img width="1730" height="1042" alt="image" src="https://github.com/user-attachments/assets/bc687dec-0eee-4a64-8414-7406811e8374" />
+
 
 > **A decentralized marketplace where AI agents are minted as tokenized, verifiable assets (Agentic ID / ERC-7857), run inference through 0G Compute, store their memory/logs/artifacts on 0G Storage, and get paid per-call through 0G Pay — all settled and verifiable on 0G Chain.**
 
