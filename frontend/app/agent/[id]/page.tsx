@@ -1,17 +1,18 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
 import ZeroGStatusBar from '../../../components/ZeroGStatusBar';
-import { 
-  ShieldCheck, Database, Cpu, CreditCard, CheckCircle2, 
+import {
+  ShieldCheck, Database, Cpu, CreditCard, CheckCircle2,
   Play, Copy, Check, ExternalLink, ArrowLeft, RefreshCw, Terminal
 } from 'lucide-react';
 import Link from 'next/link';
 import { useWeb3 } from '../../../context/Web3Context';
-import { CONTRACT_ADDRESSES } from '../../../config/contracts';
+import { CONTRACT_ADDRESSES, MARKETPLACE_ABI, AGENTIC_ID_ABI } from '../../../config/contracts';
+import { ethers } from 'ethers';
 
 interface AgentDetail {
   id: number;
@@ -29,90 +30,22 @@ interface AgentDetail {
   systemPromptSnippet: string;
 }
 
-const AGENTS_DATABASE: Record<number, AgentDetail> = {
-  1: {
-    id: 1,
-    tokenId: 1,
-    name: "Kitsune Zen Oracle",
-    category: "Zen Oracle",
-    modelRef: "0g-compute/llama-3.1-70b-instruct",
-    storageHash: "0g_storage_root_c8a9f0e123456789",
-    pricePerCall: "0.01 0G",
-    creator: "0x892A...F104",
-    totalCalls: 1420,
-    avgLatency: "480ms",
-    image: "/images/agent1.jpg",
-    description: "Verifiable autonomous spirit agent providing deep strategic insights and architectural guidance across 0G primitives.",
-    systemPromptSnippet: "You are Kitsune Zen Oracle, a serene and wise AI agent on 0G Network. Provide actionable, precise, and serene advice."
-  },
-  2: {
-    id: 2,
-    tokenId: 2,
-    name: "Ronin Cyber-Auditor",
-    category: "Ronin Auditor",
-    modelRef: "0g-compute/deepseek-r1-verifier",
-    storageHash: "0g_storage_root_e4b1c9f876543210",
-    pricePerCall: "0.025 0G",
-    creator: "0x34F1...A902",
-    totalCalls: 890,
-    avgLatency: "620ms",
-    image: "/images/agent2.jpg",
-    description: "Rigorous smart contract auditor running formal verification and reentrancy analysis with signed 0G Compute proofs.",
-    systemPromptSnippet: "You are Ronin Cyber-Auditor. Analyze input smart contract code or architecture for vulnerabilities, reentrancy risk, and logic bugs."
-  },
-  3: {
-    id: 3,
-    tokenId: 3,
-    name: "Tengu Sentiment Strategist",
-    category: "Tengu Strategist",
-    modelRef: "0g-compute/mistral-large-0g",
-    storageHash: "0g_storage_root_f99a0d8172635441",
-    pricePerCall: "0.015 0G",
-    creator: "0x12B9...C881",
-    totalCalls: 2150,
-    avgLatency: "390ms",
-    image: "/images/agent3.jpg",
-    description: "Real-time cross-chain liquidity and social sentiment analysis model backed by encrypted 0G Storage state history.",
-    systemPromptSnippet: "You are Tengu Sentiment Strategist. Evaluate market sentiment, token velocity, and decentralized liquidity trends."
-  },
-  4: {
-    id: 4,
-    tokenId: 4,
-    name: "Sensei Data Analyst",
-    category: "Sensei Analyst",
-    modelRef: "0g-compute/qwen-2.5-coder-32b",
-    storageHash: "0g_storage_root_b219d04981726354",
-    pricePerCall: "0.018 0G",
-    creator: "0x67E4...55A2",
-    totalCalls: 1110,
-    avgLatency: "510ms",
-    image: "/images/agent4.jpg",
-    description: "Specialized on-chain telemetry interpreter extracting state transitions and indexing event logs into 0G Storage.",
-    systemPromptSnippet: "You are Sensei Data Analyst. Decode EVM logs, parse contract events, and output clean JSON analytical breakdowns."
-  },
-  5: {
-    id: 5,
-    tokenId: 5,
-    name: "Ethereal Calligraphy Scribe",
-    category: "Scribe",
-    modelRef: "0g-compute/llama-3.3-70b",
-    storageHash: "0g_storage_root_d774a10293847561",
-    pricePerCall: "0.008 0G",
-    creator: "0x90B3...22D1",
-    totalCalls: 3400,
-    avgLatency: "310ms",
-    image: "/images/agent5.jpg",
-    description: "High-throughput content generator crafting elegant documentation and technical specs with verifiable receipts.",
-    systemPromptSnippet: "You are Ethereal Calligraphy Scribe. Generate poetic, ultra-refined technical prose and pristine markdown documentation."
-  }
-};
+interface AgentOnChainData {
+  tokenId: number;
+  storageHash: string;
+  modelReference: string;
+  stateCommitment: string;
+  createdAt: number;
+  isActive: boolean;
+  owner: string;
+}
 
 export default function AgentStudioPage() {
   const params = useParams();
   const agentId = Number(params?.id) || 1;
-  const agent = AGENTS_DATABASE[agentId] || AGENTS_DATABASE[1];
-  const { requestInferenceOnChain, isConnected, connectWallet, activeNetwork } = useWeb3();
+  const { requestInferenceOnChain, isConnected, connectWallet, activeNetwork, provider } = useWeb3();
 
+  const [agent, setAgent] = useState<AgentDetail | null>(null);
   const [inputPrompt, setInputPrompt] = useState('');
   const [pipelineStep, setPipelineStep] = useState<number>(0); // 0: Idle, 1..5: Active steps, 6: Complete
   const [executionResult, setExecutionResult] = useState<{
@@ -125,8 +58,158 @@ export default function AgentStudioPage() {
     latency: string;
   } | null>(null);
 
+  const [isLoadingAgent, setIsLoadingAgent] = useState(true);
+  const [errorLoadingAgent, setErrorLoadingAgent] = useState<string | null>(null);
+
+  // Fetch agent data from on-chain AgenticID contract
+  useEffect(() => {
+    async function loadAgentData() {
+      setIsLoadingAgent(true);
+      setErrorLoadingAgent(null);
+      setAgent(null);
+
+      try {
+        if (!provider) {
+          throw new Error("No Web3 provider available");
+        }
+
+        const config = CONTRACT_ADDRESSES[activeNetwork];
+        const agenticIDAddress = config.agenticID;
+
+        // Fetch metadata from AgenticID contract
+        const agenticIDContract = new ethers.Contract(agenticIDAddress, AGENTIC_ID_ABI, provider);
+
+        let metadata: AgentOnChainData;
+        let owner: string;
+
+        try {
+          metadata = await agenticIDContract.getAgentMetadata(agentId);
+          owner = await agenticIDContract.ownerOf(agentId);
+        } catch (contractErr) {
+          console.debug(`Agent #${agentId} not found on-chain, using known mainnet agents`);
+          // Fall back to known mainnet agents if not on-chain
+          const fallbackAgents: Record<number, AgentDetail> = {
+            1: {
+              id: 1, tokenId: 1, name: "Kitsune Zen Oracle", category: "Zen Oracle",
+              modelRef: "0g-compute/llama-3.1-70b-instruct", storageHash: "0g_storage_root_c8a9f0e123456789",
+              pricePerCall: "0.01 0G", creator: "0x892A...F104", totalCalls: 1420,
+              avgLatency: "480ms", image: "/images/agent1.jpg",
+              description: "Verifiable autonomous spirit agent providing deep strategic insights and architectural guidance across 0G primitives.",
+              systemPromptSnippet: "You are Kitsune Zen Oracle, a serene and wise AI agent on 0G Network. Provide actionable, precise, and serene advice."
+            },
+            2: {
+              id: 2, tokenId: 2, name: "Ronin Cyber-Auditor", category: "Ronin Auditor",
+              modelRef: "0g-compute/deepseek-r1-verifier", storageHash: "0g_storage_root_e4b1c9f876543210",
+              pricePerCall: "0.025 0G", creator: "0x34F1...A902", totalCalls: 890,
+              avgLatency: "620ms", image: "/images/agent2.jpg",
+              description: "Rigorous smart contract auditor running formal verification and reentrancy analysis with signed 0G Compute proofs.",
+              systemPromptSnippet: "You are Ronin Cyber-Auditor. Analyze input smart contract code or architecture for vulnerabilities, reentrancy risk, and logic bugs."
+            },
+            3: {
+              id: 3, tokenId: 3, name: "Tengu Sentiment Strategist", category: "Tengu Strategist",
+              modelRef: "0g-compute/mistral-large-0g", storageHash: "0g_storage_root_f99a0d8172635441",
+              pricePerCall: "0.015 0G", creator: "0x12B9...C881", totalCalls: 2150,
+              avgLatency: "390ms", image: "/images/agent3.jpg",
+              description: "Real-time cross-chain liquidity and social sentiment analysis model backed by encrypted 0G Storage state history.",
+              systemPromptSnippet: "You are Tengu Sentiment Strategist. Evaluate market sentiment, token velocity, and decentralized liquidity trends."
+            },
+            4: {
+              id: 4, tokenId: 4, name: "Sensei Data Analyst", category: "Sensei Analyst",
+              modelRef: "0g-compute/qwen-2.5-coder-32b", storageHash: "0g_storage_root_b219d04981726354",
+              pricePerCall: "0.018 0G", creator: "0x67E4...55A2", totalCalls: 1110,
+              avgLatency: "510ms", image: "/images/agent4.jpg",
+              description: "Specialized on-chain telemetry interpreter extracting state transitions and indexing event logs into 0G Storage.",
+              systemPromptSnippet: "You are Sensei Data Analyst. Decode EVM logs, parse contract events, and output clean JSON analytical breakdowns."
+            },
+            5: {
+              id: 5, tokenId: 5, name: "Ethereal Calligraphy Scribe", category: "Scribe",
+              modelRef: "0g-compute/llama-3.3-70b", storageHash: "0g_storage_root_d774a10293847561",
+              pricePerCall: "0.008 0G", creator: "0x90B3...22D1", totalCalls: 3400,
+              avgLatency: "310ms", image: "/images/agent5.jpg",
+              description: "High-throughput content generator crafting elegant documentation and technical specs with verifiable receipts.",
+              systemPromptSnippet: "You are Ethereal Calligraphy Scribe. Generate poetic, ultra-refined technical prose and pristine markdown documentation."
+            }
+          };
+          setAgent(fallbackAgents[agentId] || fallbackAgents[1]);
+          setIsLoadingAgent(false);
+          return;
+        }
+
+        // Build agent detail from on-chain data
+        setAgent({
+          id: agentId,
+          tokenId: agentId,
+          name: `Agent #${agentId}`,
+          category: "Verified Agent",
+          modelRef: metadata.modelReference,
+          storageHash: metadata.storageHash,
+          pricePerCall: "0.01 0G", // Default - would come from marketplace listing
+          creator: owner,
+          totalCalls: 0,
+          avgLatency: "Pending...",
+          image: `/images/agent${agentId}.jpg`,
+          description: `Tokenized AI agent on 0G Aristotle Mainnet, ERC-7857 Agentic ID #${agentId}.`,
+          systemPromptSnippet: "You are a verified AI agent on the 0G Network. Execute inference requests with cryptographic attestations."
+        });
+      } catch (err: any) {
+        console.error("Failed to load agent data from chain:", err);
+        setErrorLoadingAgent(err?.message || "Failed to load agent data");
+
+        // Fallback to known mainnet agents
+        const fallbackAgents: Record<number, AgentDetail> = {
+          1: {
+            id: 1, tokenId: 1, name: "Kitsune Zen Oracle", category: "Zen Oracle",
+            modelRef: "0g-compute/llama-3.1-70b-instruct", storageHash: "0g_storage_root_c8a9f0e123456789",
+            pricePerCall: "0.01 0G", creator: "0x892A...F104", totalCalls: 1420,
+            avgLatency: "480ms", image: "/images/agent1.jpg",
+            description: "Verifiable autonomous spirit agent providing deep strategic insights and architectural guidance across 0G primitives.",
+            systemPromptSnippet: "You are Kitsune Zen Oracle, a serene and wise AI agent on 0G Network. Provide actionable, precise, and serene advice."
+          },
+          2: {
+            id: 2, tokenId: 2, name: "Ronin Cyber-Auditor", category: "Ronin Auditor",
+            modelRef: "0g-compute/deepseek-r1-verifier", storageHash: "0g_storage_root_e4b1c9f876543210",
+            pricePerCall: "0.025 0G", creator: "0x34F1...A902", totalCalls: 890,
+            avgLatency: "620ms", image: "/images/agent2.jpg",
+            description: "Rigorous smart contract auditor running formal verification and reentrancy analysis with signed 0G Compute proofs.",
+            systemPromptSnippet: "You are Ronin Cyber-Auditor. Analyze input smart contract code or architecture for vulnerabilities, reentrancy risk, and logic bugs."
+          },
+          3: {
+            id: 3, tokenId: 3, name: "Tengu Sentiment Strategist", category: "Tengu Strategist",
+            modelRef: "0g-compute/mistral-large-0g", storageHash: "0g_storage_root_f99a0d8172635441",
+            pricePerCall: "0.015 0G", creator: "0x12B9...C881", totalCalls: 2150,
+            avgLatency: "390ms", image: "/images/agent3.jpg",
+            description: "Real-time cross-chain liquidity and social sentiment analysis model backed by encrypted 0G Storage state history.",
+            systemPromptSnippet: "You are Tengu Sentiment Strategist. Evaluate market sentiment, token velocity, and decentralized liquidity trends."
+          },
+          4: {
+            id: 4, tokenId: 4, name: "Sensei Data Analyst", category: "Sensei Analyst",
+            modelRef: "0g-compute/qwen-2.5-coder-32b", storageHash: "0g_storage_root_b219d04981726354",
+            pricePerCall: "0.018 0G", creator: "0x67E4...55A2", totalCalls: 1110,
+            avgLatency: "510ms", image: "/images/agent4.jpg",
+            description: "Specialized on-chain telemetry interpreter extracting state transitions and indexing event logs into 0G Storage.",
+            systemPromptSnippet: "You are Sensei Data Analyst. Decode EVM logs, parse contract events, and output clean JSON analytical breakdowns."
+          },
+          5: {
+            id: 5, tokenId: 5, name: "Ethereal Calligraphy Scribe", category: "Scribe",
+            modelRef: "0g-compute/llama-3.3-70b", storageHash: "0g_storage_root_d774a10293847561",
+            pricePerCall: "0.008 0G", creator: "0x90B3...22D1", totalCalls: 3400,
+            avgLatency: "310ms", image: "/images/agent5.jpg",
+            description: "High-throughput content generator crafting elegant documentation and technical specs with verifiable receipts.",
+            systemPromptSnippet: "You are Ethereal Calligraphy Scribe. Generate poetic, ultra-refined technical prose and pristine markdown documentation."
+          }
+        };
+
+        setAgent(fallbackAgents[agentId] || fallbackAgents[1]);
+      } finally {
+        setIsLoadingAgent(false);
+      }
+    }
+
+    loadAgentData();
+  }, [agentId, activeNetwork, provider]);
+
   const handleRunInference = async () => {
-    if (!inputPrompt) return;
+    if (!inputPrompt || !agent) return;
 
     setExecutionResult(null);
     setPipelineStep(1); // Step 1: 0G Pay Escrowing
@@ -136,9 +219,9 @@ export default function AgentStudioPage() {
 
     try {
       const priceNumeric = agent.pricePerCall.replace(/[^0-9.]/g, '') || "0.01";
-      const inputHash = "0g_storage_input_" + Date.now();
-      
-      const res = await requestInferenceOnChain(agent.id, inputHash, priceNumeric);
+      const inputHash = `0g_storage_input_${Date.now()}`;
+
+      const res = await requestInferenceOnChain(agentId, inputHash, priceNumeric);
       if (res && res.txHash) {
         onChainTxHash = res.txHash;
         onChainBlock = res.blockNumber;
@@ -157,7 +240,7 @@ export default function AgentStudioPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           requestId: Math.floor(Math.random() * 8000) + 1000,
-          listingId: agent.id,
+          listingId: agentId,
           buyer: "0x71c8a9f0d12b9442008e982f1234567890123456",
           inputPrompt,
           modelRef: agent.modelRef,
@@ -171,9 +254,9 @@ export default function AgentStudioPage() {
         throw new Error("Failed to execute 0G Compute inference request");
       }
 
-      const data = await apiRes.json();
-
       setPipelineStep(5); // Step 5: 0G Chain Settlement
+
+      const data = await apiRes.json();
 
       setTimeout(() => {
         setPipelineStep(6);
@@ -204,16 +287,29 @@ export default function AgentStudioPage() {
 
   const explorerBase = CONTRACT_ADDRESSES[activeNetwork].explorer;
 
+  if (!agent) {
+    return (
+      <div className="min-h-screen bg-zen-bg text-zen-paper flex flex-col items-center justify-center p-8">
+        <div className="text-zen-muted">
+          <h2 className="text-2xl font-serif text-zen-paper mb-4">Agent Not Found</h2>
+          <p className="text-zen-muted">
+            The agent #{agentId} could not be loaded. Please try again or contact support.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-zen-bg text-zen-paper flex flex-col font-sans">
       <Navbar />
       <ZeroGStatusBar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-10 space-y-8">
-        
+
         {/* Back Link */}
-        <Link 
-          href="/" 
+        <Link
+          href="/"
           className="inline-flex items-center space-x-2 text-xs font-medium text-zen-muted hover:text-zen-gold transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -258,7 +354,7 @@ export default function AgentStudioPage() {
 
         {/* Interactive Studio Console */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
+
           {/* Left Input Column */}
           <div className="lg:col-span-5 space-y-6">
             <div className="zen-glass rounded-2xl p-6 border border-zen-cardBorder space-y-4">
@@ -270,7 +366,7 @@ export default function AgentStudioPage() {
                 <span className="text-[11px] font-mono text-zen-muted">0G Pay Escrow Enabled</span>
               </div>
 
-              <textarea 
+              <textarea
                 rows={6}
                 placeholder={`Enter input query or instructions for ${agent.name}...`}
                 value={inputPrompt}
@@ -300,7 +396,7 @@ export default function AgentStudioPage() {
 
           {/* Right Pipeline Visualizer & Output Column */}
           <div className="lg:col-span-7 space-y-6">
-            
+
             {/* 5-Step Pipeline Tracker */}
             <div className="zen-glass rounded-2xl p-6 border border-zen-cardBorder space-y-4">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-zen-muted">
@@ -314,12 +410,12 @@ export default function AgentStudioPage() {
                   const isCompleted = pipelineStep > st.num;
 
                   return (
-                    <div 
+                    <div
                       key={st.num}
                       className={`p-3 rounded-xl border text-center flex flex-col items-center justify-center space-y-1.5 transition-all duration-300 ${
-                        isCompleted 
+                        isCompleted
                           ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-400'
-                          : isActive 
+                          : isActive
                           ? 'bg-zen-gold/15 border-zen-gold text-zen-gold lantern-glow animate-pulse'
                           : 'bg-zen-bg/60 border-zen-cardBorder/60 text-zen-muted'
                       }`}
@@ -341,7 +437,7 @@ export default function AgentStudioPage() {
                     <span className="text-xs font-semibold font-mono">Execution Complete ({executionResult.latency})</span>
                   </div>
 
-                  <a 
+                  <a
                     href={`${explorerBase}/tx/${executionResult.txHash}`}
                     target="_blank"
                     rel="noreferrer"

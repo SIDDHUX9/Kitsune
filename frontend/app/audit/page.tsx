@@ -90,6 +90,7 @@ export default function AuditPage() {
       const liveRecords: AuditRecord[] = [];
 
       try {
+        // 1. Try relayer API first (real off-chain data)
         const relayerEndpoint = process.env.NEXT_PUBLIC_RELAYER_URL || "http://localhost:3001";
         const res = await fetch(`${relayerEndpoint}/api/audit-logs`, {
           signal: AbortSignal.timeout(3000)
@@ -98,14 +99,16 @@ export default function AuditPage() {
           const data = await res.json();
           if (data && data.logs && data.logs.length > 0) {
             data.logs.forEach((log: any) => {
+              const outputHash = log.outputStorageHash || `0g_storage_root_${log.resultHash?.slice(2, 18)}`;
+              const inputHash = log.inputHash || `0g_storage_input_req${log.requestId}`;
               liveRecords.push({
                 requestId: log.requestId,
                 agentName: log.listingId === 2 ? "Ronin Cyber-Auditor" : log.listingId === 3 ? "Tengu Sentiment Strategist" : "Kitsune Zen Oracle",
                 tokenId: log.listingId,
                 buyer: log.buyer ? `${log.buyer.slice(0, 6)}...${log.buyer.slice(-4)}` : "0xb5a...c120",
                 escrowAmount: "0.01 0G",
-                inputStorageHash: log.inputHash || `0g_storage_input_req${log.requestId}`,
-                outputStorageHash: log.outputStorageHash,
+                inputStorageHash: inputHash,
+                outputStorageHash: outputHash,
                 workerAttestation: log.workerAttestation ? log.workerAttestation.slice(0, 18) + "..." : "0x892a...f91a",
                 txHash: log.txHash || "0xc9c4f393131832992bdf4ee27433c3735dd5de2166581b01b1df5d5aa69b3153",
                 timestamp: log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : "Just now",
@@ -118,6 +121,7 @@ export default function AuditPage() {
         console.debug("Relayer audit log notice (using direct chain fallback):", err);
       }
 
+      // 2. Fallback: Query on-chain Marketplace events directly
       try {
         if (provider) {
           const config = CONTRACT_ADDRESSES[activeNetwork];
@@ -150,16 +154,16 @@ export default function AuditPage() {
         }
       } catch (err) {
         console.debug("Querying contract logs fallback:", err);
-      } finally {
-        setAuditLogs([...liveRecords, ...SAMPLE_AUDIT_LOGS]);
-        setIsLoadingEvents(false);
       }
+
+      setAuditLogs(liveRecords.length > 0 ? liveRecords : SAMPLE_AUDIT_LOGS);
+      setIsLoadingEvents(false);
     }
 
     loadLogs();
   }, [activeNetwork, provider]);
 
-  const filteredLogs = auditLogs.filter(log => 
+  const filteredLogs = auditLogs.filter(log =>
     log.agentName.toLowerCase().includes(filterText.toLowerCase()) ||
     log.buyer.toLowerCase().includes(filterText.toLowerCase()) ||
     log.inputStorageHash.toLowerCase().includes(filterText.toLowerCase()) ||
@@ -174,7 +178,7 @@ export default function AuditPage() {
       <ZeroGStatusBar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-12 space-y-8">
-        
+
         {/* Header */}
         <div className="space-y-3 border-b border-zen-cardBorder pb-6">
           <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-zen-gold/10 border border-zen-gold/30 text-zen-gold text-xs font-serif">
@@ -193,7 +197,7 @@ export default function AuditPage() {
         <div className="flex items-center justify-between gap-4">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zen-muted" />
-            <input 
+            <input
               type="text"
               placeholder="Search by agent, buyer address, or 0G Storage hash..."
               value={filterText}
@@ -235,7 +239,7 @@ export default function AuditPage() {
                     <td className="py-4 px-6 text-teal-400 font-semibold">{log.outputStorageHash}</td>
                     <td className="py-4 px-6 text-amber-400 truncate max-w-[150px]">{log.workerAttestation}</td>
                     <td className="py-4 px-6">
-                      <a 
+                      <a
                         href={`${explorerBase}/tx/${log.txHash}`}
                         target="_blank"
                         rel="noreferrer"

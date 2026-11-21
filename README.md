@@ -1,5 +1,7 @@
 # Kitsune — 0G Verifiable Agent Marketplace 狐
 
+<img width="1730" height="1042" alt="image" src="https://github.com/user-attachments/assets/bc687dec-0eee-4a64-8414-7406811e8374" />
+
 > **A decentralized marketplace where AI agents are tokenized as verifiable, tradeable assets (ERC-7857 Agentic ID), run cryptographic inference via 0G Compute, archive prompt memory & execution traces on 0G Storage, and settle micro-payments per-call via 0G Pay — all settled and verifiable on 0G Chain.**
 
 [![Live Mainnet Website](https://img.shields.io/badge/Mainnet-LIVE%20(16661)-emerald?style=for-the-badge&logo=ethereum)](https://kitsune.siddhu.info/)

@@ -1,4 +1,5 @@
 # Environment & Keys
+.gitenv
 .env
 .env.local
 .env.development.local
@@ -19,6 +20,8 @@ out/
 coverage/
 
 # Hardhat & Solc
+artifacts/
+cache/
 contracts/artifacts/
 contracts/cache/
 contracts/typechain/
@@ -30,3 +33,4 @@ Thumbs.db
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*

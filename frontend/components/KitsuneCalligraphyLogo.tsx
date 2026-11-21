@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 
 interface KitsuneCalligraphyLogoProps {
   className?: string;
@@ -20,7 +20,7 @@ export default function KitsuneCalligraphyLogo({ className = "", size = 180 }: K
   }, []);
 
   // Serene line stroke animation (0 to 1 path length over 2.6 seconds)
-  const strokeVariants = {
+  const strokeVariants: any = {
     hidden: { pathLength: 0, opacity: 0 },
     visible: {
       pathLength: 1,
