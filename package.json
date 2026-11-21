@@ -10,6 +10,7 @@
     "relayer": "npm --prefix relayer run dev"
   },
   "dependencies": {
+    "@openzeppelin/contracts": "^5.6.1",
     "clsx": "^2.1.0",
     "ethers": "^6.11.1",
     "framer-motion": "^11.0.8",
@@ -24,6 +25,7 @@
     "@types/react": "^18.2.60",
     "@types/react-dom": "^18.2.19",
     "autoprefixer": "^10.4.17",
+    "hardhat": "^2.26.3",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3"

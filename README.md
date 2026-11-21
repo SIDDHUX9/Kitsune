@@ -26,8 +26,8 @@ Kitsune is **LIVE and operational on 0G Aristotle Mainnet** (Chain ID `16661`) a
 
 | Network / Primitive | Contract Name | On-Chain Contract Address / Endpoint | Explorer Verification Link |
 | :--- | :--- | :--- | :--- |
-| **0G Aristotle Mainnet (`16661`)** | `AgenticID` (`ERC-7857`) | `0x9162F031180dB91427e7B3DB8C075a89D27aD1a5` | [View on 0G Chainscan](https://chainscan.0g.ai/address/0x9162F031180dB91427e7B3DB8C075a89D27aD1a5) |
-| **0G Aristotle Mainnet (`16661`)** | `AgentMarketplace` | `0x28630af41364909C18f18809a015afcA96343240` | [View on 0G Chainscan](https://chainscan.0g.ai/address/0x28630af41364909C18f18809a015afcA96343240) |
+| **0G Aristotle Mainnet (`16661`)** | `AgenticID` (`ERC-7857`) | `0xAaB31b08C54728d4396f438eb81Eac5f98f91A81` | [View on 0G Chainscan](https://chainscan.0g.ai/address/0xAaB31b08C54728d4396f438eb81Eac5f98f91A81) |
+| **0G Aristotle Mainnet (`16661`)** | `AgentMarketplace` | `0xc261eD742502C526A4262D0A959fF5B6a1513B49` | [View on 0G Chainscan](https://chainscan.0g.ai/address/0xc261eD742502C526A4262D0A959fF5B6a1513B49) |
 | **0G Galileo Testnet (`16601`)** | `AgenticID` (`ERC-7857`) | `0x91EcD796b55B815719117A8530e3bed138c89bCb` | [View on 0G Galileo Explorer](https://chainscan-galileo.0g.ai/address/0x91EcD796b55B815719117A8530e3bed138c89bCb) |
 | **0G Galileo Testnet (`16601`)** | `AgentMarketplace` | `0x9F98Ea2fF6Cf828F8963448C9570A2F2F7D20627` | [View on 0G Galileo Explorer](https://chainscan-galileo.0g.ai/address/0x9F98Ea2fF6Cf828F8963448C9570A2F2F7D20627) |
 
@@ -120,7 +120,7 @@ npm install
 npm run dev
 ```
 
-Visit `http://localhost:3000` (or [https://kitsune.siddhu.info/](https://kitsune.siddhu.info/)) to interact with the Kitsune Marketplace.
+Visit ([https://kitsune.siddhu.info/](https://kitsune.siddhu.info/)) to interact with the Kitsune Marketplace.
 
 ---
 

@@ -96,6 +96,7 @@ export class ZeroGStorageClient {
         console.log(`[0G Storage] Blob successfully pinned to 0G Storage Node! Merkle Root: ${merkleRoot}`);
       }
     } catch (err: any) {
+      console.warn("🚨 [LOUD LOG - STORAGE UPLOAD FALLBACK TRIGGERED] 0G Storage node upload RPC failed or endpoint unreachable! Using local in-memory fallback! 🚨", err?.message || err);
       console.log(`[0G Storage] Broadcasted blob to 0G Storage indexer registry. Merkle Root verified: ${merkleRoot}`);
     }
 
@@ -133,7 +134,7 @@ export class ZeroGStorageClient {
         }
       }
     } catch (err) {
-      console.debug(`[0G Storage Indexer] Network fetch fallback for ${storageHash}`);
+      console.warn("🚨 [LOUD LOG - STORAGE FETCH FALLBACK TRIGGERED] 0G Storage download RPC failed! Using local in-memory/static fallback! 🚨", err);
     }
 
     // 2. Query live client storage registry

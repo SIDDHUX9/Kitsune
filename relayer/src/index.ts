@@ -19,8 +19,8 @@ const OG_NETWORKS = {
   galileo: {
     name: "0G-Galileo (Testnet)",
     chainId: 16601,
-    rpc: process.env.OG_GALILEO_RPC || "http://evmrpc-testnet.0g.ai",
-    explorer: "https://chainscan.0g.ai"
+    rpc: process.env.OG_GALILEO_RPC || "https://evmrpc-testnet.0g.ai",
+    explorer: "https://chainscan-galileo.0g.ai"
   },
   localhost: {
     name: "Hardhat Localhost",
@@ -106,6 +106,7 @@ export class ZeroGRelayer {
     }
 
     if (!responseText) {
+      console.warn("🚨 [LOUD LOG - 0G MOCK/FALLBACK TRIGGERED] 0G Compute network router returned no response or authorization failed. Executing local fallback template response! 🚨");
       const isAuditor = modelRef.includes("deepseek") || (systemPromptSnippet && systemPromptSnippet.includes("Auditor"));
       const isOracle = modelRef.includes("llama") || (systemPromptSnippet && systemPromptSnippet.includes("Oracle"));
       const isStrategist = modelRef.includes("mistral") || (systemPromptSnippet && systemPromptSnippet.includes("Strategist"));
@@ -192,8 +193,8 @@ const relayer = new ZeroGRelayer(
   targetNetwork.rpc,
   process.env.RELAYER_PRIVATE_KEY || demoWallet.privateKey,
   process.env.WORKER_PRIVATE_KEY || demoWallet.privateKey,
-  process.env.MARKETPLACE_ADDRESS || "0x9F98Ea2fF6Cf828F8963448C9570A2F2F7D20627",
-  process.env.AGENTIC_ID_ADDRESS || "0x0000000000000000000000000000000000000000"
+  process.env.MARKETPLACE_ADDRESS || "0xc261eD742502C526A4262D0A959fF5B6a1513B49",
+  process.env.AGENTIC_ID_ADDRESS || "0xAaB31b08C54728d4396f438eb81Eac5f98f91A81"
 );
 
 // Express Routes for Vercel Serverless Function & Standalone Server

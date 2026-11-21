@@ -80,6 +80,7 @@ export async function POST(request: Request) {
 
     // 2. Direct 0G Compute provider output generation based on agent domain & prompt
     if (!responseText) {
+      console.warn("🚨 [LOUD LOG - 0G MOCK/FALLBACK TRIGGERED] 0G Compute network router returned no response or authorization failed. Executing local fallback template response! 🚨");
       const isAuditor = model.includes("deepseek") || systemPrompt.includes("Auditor") || systemPrompt.includes("vulnerabilit");
       const isOracle = model.includes("llama") || systemPrompt.includes("Oracle") || systemPrompt.includes("serene");
       const isStrategist = model.includes("mistral") || systemPrompt.includes("Sentiment") || systemPrompt.includes("velocity");
@@ -119,10 +120,11 @@ export async function POST(request: Request) {
     const merkleRoot = computeZeroGStorageRoot(bytes);
     const auditLogHash = `0g_storage_root_${merkleRoot.slice(2, 18)}`;
 
-    // 5. Generate authentic worker ECDSA attestation signature
-    const workerRawKey = process.env.WORKER_PRIVATE_KEY || "0xfd9b76f4e98112193ac346bb83d9a3160ae3e731d04273302d20c6a6339ada0f";
-    const workerKey = workerRawKey.startsWith("0x") ? workerRawKey : `0x${workerRawKey}`;
-    const workerWallet = new ethers.Wallet(workerKey);
+    // 5. Generate authentic worker ECDSA attestation signature (ephemeral demo signer if WORKER_PRIVATE_KEY is unset)
+    const workerRawKey = process.env.WORKER_PRIVATE_KEY;
+    const workerWallet = workerRawKey
+      ? new ethers.Wallet(workerRawKey.startsWith("0x") ? workerRawKey : `0x${workerRawKey}`)
+      : ethers.Wallet.createRandom();
 
     const reqIdNum = requestId || 1045;
     const listIdNum = listingId || 1;
@@ -134,18 +136,25 @@ export async function POST(request: Request) {
     );
     const workerSignature = await workerWallet.signMessage(ethers.getBytes(messageHash));
 
-    // 6. Execute real 0G Chain transaction via 0G Pay Relayer
+    // 6. Execute real 0G Chain transaction via 0G Pay Relayer (only when server relayer key is configured)
     let txHash = "";
     let blockNumber = 0;
 
     try {
-      const rpc = process.env.OG_GALILEO_RPC || "https://evmrpc-testnet.0g.ai";
+      const rawKey = process.env.RELAYER_PRIVATE_KEY || process.env.PRIVATE_KEY;
+      if (!rawKey) {
+        throw new Error("Server relayer key not configured; using fallback receipt");
+      }
+      const rpc = process.env.OG_ARISTOTLE_RPC || process.env.OG_GALILEO_RPC || "https://evmrpc.0g.ai";
       const provider = new ethers.JsonRpcProvider(rpc);
-      const rawKey = process.env.PRIVATE_KEY || "0xfd9b76f4e98112193ac346bb83d9a3160ae3e731d04273302d20c6a6339ada0f";
       const privateKey = rawKey.startsWith("0x") ? rawKey : `0x${rawKey}`;
       const relayerWallet = new ethers.Wallet(privateKey, provider);
+      const marketplaceAddress = process.env.MARKETPLACE_ADDRESS || process.env.NEXT_PUBLIC_ARISTOTLE_MARKETPLACE;
+      if (!marketplaceAddress) {
+        throw new Error("MARKETPLACE_ADDRESS not configured");
+      }
 
-      const marketplaceContract = new ethers.Contract("0x9F98Ea2fF6Cf828F8963448C9570A2F2F7D20627", [
+      const marketplaceContract = new ethers.Contract(marketplaceAddress, [
         "function requestInference(uint256 listingId, string calldata inputHash) external payable returns (uint256)"
       ], relayerWallet);
 
@@ -158,7 +167,7 @@ export async function POST(request: Request) {
       blockNumber = receipt.blockNumber;
       console.log(`[0G Chain API Route] On-chain Tx Confirmed! Hash: ${txHash} | Block: #${blockNumber}`);
     } catch (err: any) {
-      console.debug("[0G Chain API Route] Relayer transaction fallback:", err?.message || err);
+      console.warn("🚨 [LOUD LOG - ON-CHAIN FALLBACK TRIGGERED] Relayer transaction failed! Using hardcoded fallback transaction hash! 🚨", err?.message || err);
       txHash = "0xc9c4f393131832992bdf4ee27433c3735dd5de2166581b01b1df5d5aa69b3153";
       blockNumber = 49530298;
     }

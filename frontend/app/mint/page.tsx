@@ -15,6 +15,7 @@ export default function MintPage() {
   const [systemPrompt, setSystemPrompt] = useState('');
   const [pricePerCall, setPricePerCall] = useState('0.01');
   const [isMinting, setIsMinting] = useState(false);
+  const [mintError, setMintError] = useState<string | null>(null);
   const [mintResult, setMintResult] = useState<{
     tokenId: number;
     storageHash: string;
@@ -38,6 +39,7 @@ export default function MintPage() {
     }
 
     setIsMinting(true);
+    setMintError(null);
 
     try {
       // 1. Upload system prompt & agent configuration to 0G Storage
@@ -65,8 +67,9 @@ export default function MintPage() {
         txHash: res.txHash,
         blockNumber: res.blockNumber
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error("Mint error:", err);
+      setMintError(err?.message || "Failed to mint Agentic ID on 0G Chain.");
     } finally {
       setIsMinting(false);
     }
@@ -225,6 +228,11 @@ export default function MintPage() {
             </div>
 
             {/* Action Button */}
+            {mintError && (
+              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-xs">
+                {mintError}
+              </div>
+            )}
             <div className="pt-4">
               <button
                 type="submit"

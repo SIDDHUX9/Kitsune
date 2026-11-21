@@ -285,86 +285,43 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const getFallbackRelayerWallet = () => {
-    const rpc = CONTRACT_ADDRESSES[activeNetwork]?.rpc || "http://evmrpc-testnet.0g.ai";
-    const provider = new ethers.JsonRpcProvider(rpc);
-    const privateKey = process.env.NEXT_PUBLIC_RELAYER_KEY || "fd9b76f4e98112193ac346bb83d9a3160ae3e731d04273302d20c6a6339ada0f";
-    return new ethers.Wallet(privateKey, provider);
+  const requireConnectedSigner = () => {
+    if (!signer || !account) {
+      throw new Error("Please connect a Web3 wallet to sign and submit this on-chain transaction.");
+    }
+    return signer;
   };
 
   const mintAgenticIDOnChain = async (storageHash: string, modelRef: string, metadataURI: string) => {
     const config = CONTRACT_ADDRESSES[activeNetwork];
+    const activeSigner = requireConnectedSigner();
 
-    if (signer && account) {
-      try {
-        console.log(`[0G Chain] Submitting mintAgenticID via connected user wallet (${account})...`);
-        const contract = new ethers.Contract(config.agenticID, AGENTIC_ID_ABI, signer);
-        const tx = await contract.mintAgenticID(account, storageHash, modelRef, metadataURI);
-        const receipt = await tx.wait();
-        const mintedEvent = receipt.logs ? receipt.logs[0] : null;
-        const tokenId = mintedEvent ? Number(mintedEvent.topics[1] || 1) : Math.floor(Math.random() * 800) + 10;
-        return { tokenId, txHash: tx.hash, blockNumber: receipt.blockNumber };
-      } catch (err: any) {
-        console.warn("[0G Chain] User wallet transaction notice (insufficient gas/canceled). Relaying via 0G Pay Account...", err?.message || err);
-      }
-    }
-
-    const relayerWallet = getFallbackRelayerWallet();
-    const targetAddress = account || relayerWallet.address;
-    const contract = new ethers.Contract(config.agenticID, AGENTIC_ID_ABI, relayerWallet);
-
-    console.log(`[0G Chain] Submitting real mintAgenticID transaction via 0G Pay Relayer (${relayerWallet.address})...`);
-    const tx = await contract.mintAgenticID(targetAddress, storageHash, modelRef, metadataURI);
+    console.log(`[0G Chain] Submitting mintAgenticID via connected user wallet (${account})...`);
+    const contract = new ethers.Contract(config.agenticID, AGENTIC_ID_ABI, activeSigner);
+    const tx = await contract.mintAgenticID(account, storageHash, modelRef, metadataURI);
     const receipt = await tx.wait();
-    console.log(`[0G Chain] Mint Tx Confirmed in Block #${receipt.blockNumber}! Hash: ${tx.hash}`);
-
     const mintedEvent = receipt.logs ? receipt.logs[0] : null;
     const tokenId = mintedEvent ? Number(mintedEvent.topics[1] || 1) : Math.floor(Math.random() * 800) + 10;
-
-    return {
-      tokenId,
-      txHash: tx.hash,
-      blockNumber: receipt.blockNumber
-    };
+    return { tokenId, txHash: tx.hash, blockNumber: receipt.blockNumber };
   };
 
   const requestInferenceOnChain = async (listingId: number, inputHash: string, priceEther: string) => {
     const config = CONTRACT_ADDRESSES[activeNetwork];
     const priceNumeric = parseFloat(priceEther) || 0.01;
     const valueWei = ethers.parseEther(priceNumeric.toString());
+    const activeSigner = requireConnectedSigner();
 
-    if (signer && account) {
-      try {
-        console.log(`[0G Chain] Submitting requestInference via connected user wallet (${account})...`);
-        const contract = new ethers.Contract(config.marketplace, MARKETPLACE_ABI, signer);
-        const tx = await contract.requestInference(listingId, inputHash, { value: valueWei });
-        const receipt = await tx.wait();
-        const reqId = Math.floor(Math.random() * 500) + 1000;
-        return { requestId: reqId, txHash: tx.hash, blockNumber: receipt.blockNumber };
-      } catch (err: any) {
-        console.warn("[0G Chain] User wallet transaction notice (insufficient gas/canceled). Relaying via 0G Pay Account...", err?.message || err);
-      }
-    }
-
-    const relayerWallet = getFallbackRelayerWallet();
-    const contract = new ethers.Contract(config.marketplace, MARKETPLACE_ABI, relayerWallet);
-
-    console.log(`[0G Chain] Submitting real requestInference transaction via 0G Pay Relayer (${relayerWallet.address})...`);
+    console.log(`[0G Chain] Submitting requestInference via connected user wallet (${account})...`);
+    const contract = new ethers.Contract(config.marketplace, MARKETPLACE_ABI, activeSigner);
     const tx = await contract.requestInference(listingId, inputHash, { value: valueWei });
     const receipt = await tx.wait();
-    console.log(`[0G Chain] Escrow Tx Confirmed in Block #${receipt.blockNumber}! Hash: ${tx.hash}`);
-
     const reqId = Math.floor(Math.random() * 500) + 1000;
-    return {
-      requestId: reqId,
-      txHash: tx.hash,
-      blockNumber: receipt.blockNumber
-    };
+    return { requestId: reqId, txHash: tx.hash, blockNumber: receipt.blockNumber };
   };
 
   const refundRequestOnChain = async (requestId: number) => {
     const config = CONTRACT_ADDRESSES[activeNetwork];
-    const activeSigner = (signer && account) ? signer : getFallbackRelayerWallet();
+    const activeSigner = requireConnectedSigner();
     const contract = new ethers.Contract(config.marketplace, MARKETPLACE_ABI, activeSigner);
 
     console.log(`[0G Chain] Submitting real refundRequest transaction for Request #${requestId}...`);

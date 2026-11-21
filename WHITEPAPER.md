@@ -135,8 +135,8 @@ Kitsune is deployed and operational on **0G Aristotle Mainnet**:
 | Primitive / Contract | Address / Link |
 | :--- | :--- |
 | **0G Mainnet Target** | `0G-Aristotle` (Chain ID `16661`, RPC: `https://evmrpc.0g.ai`) |
-| **AgenticID (`ERC-7857`)** | [`0x9162F031180dB91427e7B3DB8C075a89D27aD1a5`](https://chainscan.0g.ai/address/0x9162F031180dB91427e7B3DB8C075a89D27aD1a5) |
-| **AgentMarketplace** | [`0x28630af41364909C18f18809a015afcA96343240`](https://chainscan.0g.ai/address/0x28630af41364909C18f18809a015afcA96343240) |
+| **AgenticID (`ERC-7857`)** | [`0xAaB31b08C54728d4396f438eb81Eac5f98f91A81`](https://chainscan.0g.ai/address/0xAaB31b08C54728d4396f438eb81Eac5f98f91A81) |
+| **AgentMarketplace** | [`0xc261eD742502C526A4262D0A959fF5B6a1513B49`](https://chainscan.0g.ai/address/0xc261eD742502C526A4262D0A959fF5B6a1513B49) |
 | **Block Explorer** | [https://chainscan.0g.ai](https://chainscan.0g.ai) |
 
 ---

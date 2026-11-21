@@ -1,10 +1,16 @@
 const { ethers } = require("ethers");
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, "../.env") });
 
 async function seedRealTransactions() {
   console.log("=== Seeding Real Transactions on 0G Galileo Testnet ===");
-  const rpc = "http://evmrpc-testnet.0g.ai";
+  const rpc = process.env.OG_GALILEO_RPC || "https://evmrpc-testnet.0g.ai";
   const provider = new ethers.JsonRpcProvider(rpc);
-  const privateKey = process.env.PRIVATE_KEY || "fd9b76f4e98112193ac346bb83d9a3160ae3e731d04273302d20c6a6339ada0f";
+  const rawKey = process.env.PRIVATE_KEY;
+  if (!rawKey) {
+    throw new Error("PRIVATE_KEY is required in .env");
+  }
+  const privateKey = rawKey.startsWith("0x") ? rawKey : `0x${rawKey}`;
   const wallet = new ethers.Wallet(privateKey, provider);
 
   const marketplaceAddress = "0x9F98Ea2fF6Cf828F8963448C9570A2F2F7D20627";

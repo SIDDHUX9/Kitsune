@@ -28,6 +28,7 @@ async function sendWithRetry(fn, retries = 5, delayMs = 3000) {
 
 async function main() {
   const targetNetwork = process.argv[2] || "aristotle";
+  const forceRedeploy = process.argv.includes("--force") || process.env.FORCE_REDEPLOY === "true";
   
   let rpcUrl, chainId, explorerBase;
   if (targetNetwork === "aristotle") {
@@ -67,6 +68,8 @@ async function main() {
     throw new Error(`Deployer wallet ${wallet.address} has 0 native 0G tokens on ${targetNetwork}!`);
   }
 
+  let txOverrides = {};
+
   // Load contract artifacts
   const agenticIDArtifact = JSON.parse(
     fs.readFileSync(path.join(__dirname, "../contracts/artifacts/src/AgenticID.sol/AgenticID.json"), "utf8")
@@ -89,7 +92,7 @@ async function main() {
   let marketplace, marketplaceAddress;
 
   // 1. Deploy or attach AgenticID
-  if (existingRecord?.agenticID) {
+  if (!forceRedeploy && existingRecord?.agenticID) {
     const code = await sendWithRetry(() => provider.getCode(existingRecord.agenticID));
     if (code && code !== "0x") {
       console.log("\n[1/3] Found existing active AgenticID contract at:", existingRecord.agenticID);
@@ -102,7 +105,9 @@ async function main() {
     console.log("\n[1/3] Deploying new AgenticID (ERC-7857) Contract...");
     const AgenticIDFactory = new ethers.ContractFactory(agenticIDArtifact.abi, agenticIDArtifact.bytecode, wallet);
     agenticID = await sendWithRetry(async () => {
-      const contract = await AgenticIDFactory.deploy();
+      const nonce = await provider.getTransactionCount(wallet.address, "latest");
+      const contract = await AgenticIDFactory.deploy({ ...txOverrides, nonce });
+      console.log("AgenticID deploy tx:", contract.deploymentTransaction()?.hash);
       await contract.waitForDeployment();
       return contract;
     });
@@ -111,7 +116,7 @@ async function main() {
   }
 
   // 2. Deploy or attach AgentMarketplace
-  if (existingRecord?.marketplace) {
+  if (!forceRedeploy && existingRecord?.marketplace) {
     const code = await sendWithRetry(() => provider.getCode(existingRecord.marketplace));
     if (code && code !== "0x") {
       console.log("\n[2/3] Found existing active AgentMarketplace contract at:", existingRecord.marketplace);
@@ -124,7 +129,9 @@ async function main() {
     console.log("\n[2/3] Deploying new AgentMarketplace Contract...");
     const MarketplaceFactory = new ethers.ContractFactory(marketplaceArtifact.abi, marketplaceArtifact.bytecode, wallet);
     marketplace = await sendWithRetry(async () => {
-      const contract = await MarketplaceFactory.deploy(agenticIDAddress);
+      const nonce = await provider.getTransactionCount(wallet.address, "latest");
+      const contract = await MarketplaceFactory.deploy(agenticIDAddress, { ...txOverrides, nonce });
+      console.log("AgentMarketplace deploy tx:", contract.deploymentTransaction()?.hash);
       await contract.waitForDeployment();
       return contract;
     });
@@ -138,7 +145,7 @@ async function main() {
   const isAuthorized = await sendWithRetry(() => agenticID.authorizedUpdaters(marketplaceAddress)).catch(() => false);
   if (!isAuthorized) {
     console.log("Setting Marketplace as authorized updater in AgenticID...");
-    const tx1 = await sendWithRetry(() => agenticID.setAuthorizedUpdater(marketplaceAddress, true));
+    const tx1 = await sendWithRetry(() => agenticID.setAuthorizedUpdater(marketplaceAddress, true, txOverrides));
     await sendWithRetry(() => tx1.wait());
   }
 
@@ -147,13 +154,13 @@ async function main() {
 
   const hasRelayer = await sendWithRetry(() => marketplace.hasRole(RELAYER_ROLE, wallet.address)).catch(() => false);
   if (!hasRelayer) {
-    const tx2 = await sendWithRetry(() => marketplace.grantRole(RELAYER_ROLE, wallet.address));
+    const tx2 = await sendWithRetry(() => marketplace.grantRole(RELAYER_ROLE, wallet.address, txOverrides));
     await sendWithRetry(() => tx2.wait());
   }
 
   const hasWorker = await sendWithRetry(() => marketplace.hasRole(COMPUTE_WORKER_ROLE, wallet.address)).catch(() => false);
   if (!hasWorker) {
-    const tx3 = await sendWithRetry(() => marketplace.grantRole(COMPUTE_WORKER_ROLE, wallet.address));
+    const tx3 = await sendWithRetry(() => marketplace.grantRole(COMPUTE_WORKER_ROLE, wallet.address, txOverrides));
     await sendWithRetry(() => tx3.wait());
   }
 
@@ -212,7 +219,7 @@ async function main() {
     if (!isMinted) {
       console.log(`Minting Agent #${tokenId}: ${agent.name}...`);
       const mintTx = await sendWithRetry(() =>
-        agenticID.mintAgenticID(wallet.address, agent.storageHash, agent.modelRef, agent.uri)
+        agenticID.mintAgenticID(wallet.address, agent.storageHash, agent.modelRef, agent.uri, txOverrides)
       );
       await sendWithRetry(() => mintTx.wait());
     } else {
@@ -230,7 +237,7 @@ async function main() {
 
     if (!isListed) {
       console.log(`Listing Agent #${tokenId}: ${agent.name}...`);
-      const listTx = await sendWithRetry(() => marketplace.listAgent(tokenId, agent.price));
+      const listTx = await sendWithRetry(() => marketplace.listAgent(tokenId, agent.price, txOverrides));
       await sendWithRetry(() => listTx.wait());
     } else {
       console.log(`Listing #${tokenId} already active on-chain.`);

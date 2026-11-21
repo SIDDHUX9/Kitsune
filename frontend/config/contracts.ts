@@ -1,8 +1,8 @@
 export const CONTRACT_ADDRESSES = {
   // 0G-Aristotle Mainnet (Chain ID 16661)
   aristotle: {
-    agenticID: process.env.NEXT_PUBLIC_ARISTOTLE_AGENTIC_ID || "0x9162F031180dB91427e7B3DB8C075a89D27aD1a5",
-    marketplace: process.env.NEXT_PUBLIC_ARISTOTLE_MARKETPLACE || "0x28630af41364909C18f18809a015afcA96343240",
+    agenticID: process.env.NEXT_PUBLIC_ARISTOTLE_AGENTIC_ID || "0xAaB31b08C54728d4396f438eb81Eac5f98f91A81",
+    marketplace: process.env.NEXT_PUBLIC_ARISTOTLE_MARKETPLACE || "0xc261eD742502C526A4262D0A959fF5B6a1513B49",
     rpc: "https://evmrpc.0g.ai",
     explorer: "https://chainscan.0g.ai"
   },

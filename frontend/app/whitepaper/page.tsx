@@ -77,12 +77,12 @@ export default function WhitepaperPage() {
               <span>Target: 0G-Aristotle (16661)</span>
             </span>
             <a 
-              href="https://chainscan.0g.ai/address/0x9162F031180dB91427e7B3DB8C075a89D27aD1a5" 
+              href="https://chainscan.0g.ai/address/0xAaB31b08C54728d4396f438eb81Eac5f98f91A81" 
               target="_blank" 
               rel="noreferrer"
               className="bg-zen-card/60 hover:bg-zen-card px-3 py-1.5 rounded-lg border border-zen-cardBorder hover:border-zen-gold text-zen-paper transition-colors flex items-center space-x-1"
             >
-              <span>ERC-7857: 0x9162...D1a5</span>
+              <span>ERC-7857: 0xAaB3...1A81</span>
               <ExternalLink className="w-3 h-3 text-zen-gold" />
             </a>
           </div>
@@ -326,10 +326,10 @@ function mintAgenticID(
                 <div className="p-4 rounded-xl bg-zen-card/40 border border-zen-cardBorder flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <div className="font-bold text-zen-paper font-serif">AgenticID (ERC-7857) Contract</div>
-                    <div className="font-mono text-xs text-zen-gold">0x9162F031180dB91427e7B3DB8C075a89D27aD1a5</div>
+                    <div className="font-mono text-xs text-zen-gold">0xAaB31b08C54728d4396f438eb81Eac5f98f91A81</div>
                   </div>
                   <a
-                    href="https://chainscan.0g.ai/address/0x9162F031180dB91427e7B3DB8C075a89D27aD1a5"
+                    href="https://chainscan.0g.ai/address/0xAaB31b08C54728d4396f438eb81Eac5f98f91A81"
                     target="_blank"
                     rel="noreferrer"
                     className="px-3 py-1.5 rounded-lg bg-zen-gold/10 hover:bg-zen-gold/20 text-zen-gold text-xs font-mono border border-zen-gold/30 transition-colors flex items-center space-x-1.5 self-start sm:self-auto"
@@ -342,10 +342,10 @@ function mintAgenticID(
                 <div className="p-4 rounded-xl bg-zen-card/40 border border-zen-cardBorder flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <div className="font-bold text-zen-paper font-serif">AgentMarketplace Contract</div>
-                    <div className="font-mono text-xs text-zen-gold">0x28630af41364909C18f18809a015afcA96343240</div>
+                    <div className="font-mono text-xs text-zen-gold">0xc261eD742502C526A4262D0A959fF5B6a1513B49</div>
                   </div>
                   <a
-                    href="https://chainscan.0g.ai/address/0x28630af41364909C18f18809a015afcA96343240"
+                    href="https://chainscan.0g.ai/address/0xc261eD742502C526A4262D0A959fF5B6a1513B49"
                     target="_blank"
                     rel="noreferrer"
                     className="px-3 py-1.5 rounded-lg bg-zen-gold/10 hover:bg-zen-gold/20 text-zen-gold text-xs font-mono border border-zen-gold/30 transition-colors flex items-center space-x-1.5 self-start sm:self-auto"

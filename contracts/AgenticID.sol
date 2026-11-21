@@ -48,7 +48,7 @@ contract AgenticID is ERC721URIStorage, Ownable {
     /**
      * @notice Set authorization for contract updaters (e.g., AgentMarketplace or 0G Compute Relayer)
      */
-    setAuthorizedUpdater(address updater, bool authorized) external onlyOwner {
+    function setAuthorizedUpdater(address updater, bool authorized) external onlyOwner {
         authorizedUpdaters[updater] = authorized;
         emit AuthorizedUpdaterStatusSet(updater, authorized);
     }
@@ -123,3 +123,4 @@ contract AgenticID is ERC721URIStorage, Ownable {
         return previousOwner;
     }
 }
+
